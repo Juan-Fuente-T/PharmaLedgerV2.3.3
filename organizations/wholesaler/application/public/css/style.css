@@ -1,0 +1,269 @@
+/* === Fuentes y Fondo Base === */
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  background-color: #f8f9fa; /* Un fondo gris muy claro */
+  /* Mantenemos el padding top original si la navbar superior no es fija */
+  /* Si decides hacer fija la navbar superior más adelante, necesitarás padding-top aquí */
+}
+
+/* === Navbar Superior === */
+/* Aplicamos estilo directamente a la navbar existente en tu HTML */
+/* Se asume que no añadirás 'fixed-top' por ahora para minimizar cambios */
+nav.navbar {
+  background-color: #ffffff !important; /* Fondo blanco (importante para sobreescribir inline style) */
+  border-bottom: 1px solid #dee2e6; /* Línea sutil debajo */
+  margin-top: 0 !important; /* Quitar el margen negativo inline */
+}
+
+nav.navbar .navbar-brand {
+  color: #343a40 !important; /* Texto oscuro (importante para sobreescribir text-white) */
+  font-weight: 600;
+}
+
+/* === Ocultar la segunda navbar visualmente (mantiene estructura para JS) === */
+.navbar.navbar-default {
+  background-color: transparent !important;
+  border: none !important;
+  min-height: 0 !important;
+  margin-bottom: 0 !important;
+  padding: 0 !important;
+}
+
+/* === Sidebar === */
+#sidebar-wrapper {
+  /* Mantenemos posicionamiento y tamaño original */
+  top: 52px;
+  left: -200px; /* Estado inicial oculto original */
+  width: 235px;
+  position: fixed;
+  height: 100%;
+  z-index: 1000; /* Un poco más alto por si acaso */
+
+  /* Cambios Visuales */
+  background-color: #343a40; /* Fondo gris oscuro */
+  color: #adb5bd; /* Color de texto por defecto gris claro */
+  box-shadow: 2px 0 5px rgba(0,0,0,0.1); /* Sombra sutil a la derecha */
+}
+
+.sidebar-nav {
+  /* Mantenemos posicionamiento original */
+  position: absolute;
+  top: 0;
+  margin: 0;
+  padding: 0;
+  width: 100%; /* Ajustado a 100% del wrapper */
+  list-style: none;
+  padding-top: 15px; /* Espacio superior */
+}
+
+.sidebar-nav li {
+  /* Cambios Visuales */
+  text-indent: 0; /* Quitar indentación fija */
+  line-height: normal; /* Resetear line-height */
+}
+
+.sidebar-nav li a {
+  /* Cambios Visuales */
+  color: #adb5bd; /* Texto gris claro */
+  display: block;
+  text-decoration: none;
+  padding: 12px 20px; /* Padding ajustado */
+  font-size: 0.95rem;
+  transition: background-color 0.2s ease, color 0.2s ease; /* Transición suave */
+}
+
+.sidebar-nav li a:hover {
+  /* Cambios Visuales */
+  background: rgba(255, 255, 255, 0.1); /* Fondo claro al pasar */
+  color: #ffffff; /* Texto blanco al pasar */
+  text-decoration: none;
+}
+
+/* ESTILO PARA EL ENLACE ACTIVO (Asumiendo que tu plnClient.js añade clase 'active' al LI) */
+.sidebar-nav li.active > a { /* Más específico: el 'a' dentro del 'li.active' */
+  background-color: #007bff; /* Fondo azul primario */
+  color: #ffffff; /* Texto blanco */
+  font-weight: 500;
+}
+
+.sidebar-nav li a:active,
+.sidebar-nav li a:focus {
+  text-decoration: none;
+  outline: none; /* Quitar borde de foco */
+}
+
+.menuIcon {
+  /* Ajuste Visual */
+  padding-right: 0; /* Quitar padding derecho */
+  margin-right: 10px; /* Usar margen para espaciar */
+  width: 20px; /* Ancho fijo para alinear iconos */
+  text-align: center;
+  vertical-align: middle; /* Alinear verticalmente */
+}
+
+/* === ESTADO VISIBLE DEL SIDEBAR (Clase 'sidebar-toggle' original) === */
+/* Mantenemos la lógica original de tu CSS/JS para mostrar/ocultar */
+#sidebar-wrapper.sidebar-toggle {
+  /* Mantenemos la transición original */
+  transition: all 0.3s ease-out;
+
+  /* CORRECCIÓN IMPORTANTE: Tu CSS original tenía reglas conflictivas. */
+  /* Asumiremos que cuando tiene 'sidebar-toggle', DEBE estar visible. */
+  /* La forma más simple es llevarlo a left: 0 */
+  left: 0 !important; /* Forzar la posición visible */
+
+  /* Eliminamos el margin-left: -200px que parecía redundante/conflictivo */
+  /* margin-left: -200px; */
+}
+
+/* Quitamos la regla @media que cambiaba 'left' de forma confusa */
+/* @media (min-width: 768px) { ... } */
+
+
+/* === Contenido Principal === */
+.page-content {
+  /* Mantenemos el margen izquierdo original fijo por ahora, ya que no sabemos */
+  /* si tu JS lo modifica dinámicamente o si siempre esperas ese margen. */
+  /* Este es el enfoque MÁS SEGURO para NO romper la funcionalidad. */
+  margin-left: 251px;
+
+  /* Cambios Visuales */
+  padding: 25px; /* Añadir padding interno */
+}
+
+/* === Paneles de Contenido (Tabs) === */
+.tab-content > .tab-pane { /* Estilo aplicado a cada panel */
+  /* Cambios Visuales */
+  background-color: #ffffff; /* Fondo blanco */
+  padding: 25px; /* Padding interno */
+  border-radius: 8px; /* Bordes redondeados */
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.1); /* Sombra sutil */
+  margin-bottom: 25px; /* Espacio debajo de cada panel */
+
+  /* IMPORTANTE: NO añadimos 'display: none' aquí. */
+  /* Confiamos en que Bootstrap y/o tu plnClient.js manejan */
+  /* la visibilidad usando la clase 'active'. */
+}
+
+/* La clase 'active' que añade tu JS o Bootstrap ya debería hacer display: block */
+/* .tab-content > .tab-pane.active { display: block; } */ /* Esto ya debería venir de Bootstrap */
+
+
+/* === Alertas (Encabezados de sección) === */
+.alert { /* Estilo general para todas las alertas */
+  border-radius: 0.3rem; /* Bordes redondeados */
+}
+/* Usaremos alert-info para un look más suave */
+.alert.alert-primary, /* Aplicar también a las que eran primary */
+.alert.alert-info {
+    color: #0c5460;
+    background-color: #d1ecf1;
+    border-color: #bee5eb;
+    margin-bottom: 1.5rem; /* Más espacio debajo */
+}
+.alert h4 {
+    margin-bottom: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+
+/* === Formularios === */
+.form-control {
+  border-radius: 0.3rem; /* Bordes redondeados */
+  padding: 0.75rem 1rem; /* Más padding */
+}
+.form-control:focus {
+  border-color: #80bdff;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25); /* Efecto foco Bootstrap */
+}
+.col-form-label { /* Mejor alineación vertical de labels */
+  padding-top: calc(0.75rem + 1px);
+  padding-bottom: calc(0.75rem + 1px);
+  line-height: 1.5;
+}
+
+/* === Botones === */
+.btn {
+  border-radius: 0.3rem; /* Bordes redondeados */
+  padding: 0.6rem 1.2rem; /* Padding ajustado */
+  font-weight: 500;
+}
+/* Cambiar botones 'success' a 'primary' para consistencia */
+.btn.btn-success {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+.btn.btn-success:hover {
+    background-color: #0056b3;
+    border-color: #004a99;
+}
+.btn.btn-primary { /* Asegurar que los primary también tengan el estilo */
+    background-color: #007bff;
+    border-color: #007bff;
+}
+.btn.btn-primary:hover {
+    background-color: #0056b3;
+    border-color: #004a99;
+}
+
+
+/* === Tablas === */
+#queryResult table,
+#queryHistoryResult table {
+  margin-top: 1.5rem; /* Espacio sobre las tablas */
+}
+#queryResult table th,
+#queryHistoryResult table th {
+    background-color: #e9ecef; /* Cabecera gris claro */
+    font-weight: 600;
+}
+/* Opcional: Efecto hover en filas */
+.table-striped tbody tr:hover,
+.table-hover tbody tr:hover { /* Cubrir ambos casos */
+    background-color: #f1f1f1;
+}
+/* Estilo para los datos en las tablas (opcional) */
+#queryResult span,
+#historyTable td {
+    font-family: monospace; /* Monospace para datos como claves */
+    word-break: break-all; /* Romper palabras largas */
+    font-size: 0.9em;
+}
+
+
+/* === Ocultar los <hr> === */
+hr {
+  display: none; /* Las tarjetas ya separan visualmente */
+}
+
+
+/* === Indicador de Carga (#wait) === */
+/* Reestilizado para centrar mejor y con overlay */
+#wait {
+  display: none; /* Mantenido oculto por defecto */
+  position: fixed; /* Cubrir toda la pantalla */
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.8); /* Overlay blanco semitransparente */
+  z-index: 9999; /* Muy alto */
+  /* Centrado con Flexbox */
+  display: flex; /* Cambiado de none a flex cuando se muestra por JS */
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  text-align: center;
+  /* Quitamos borde y padding originales */
+  border: none;
+  padding: 0;
+}
+/* Estilo del texto dentro del loader */
+#wait span {
+  margin-top: 10px;
+  font-weight: bold;
+  color: #343a40;
+}
+/* IMPORTANTE: Tu JS debe seguir usando $(#wait).show() y $(#wait).hide() */
+/* o similar. Si show() no cambia a display:flex, podríamos necesitar una clase .show */

@@ -1,0 +1,39 @@
+URL del CURSO:
+https://coding-bootcamps.com/curso-de-hyperledger-fabric-smart-contract/
+
+Ejecutar desde terminal:
+- ./loadFabric.sh --para descargar y crean las imagenes docker(ejecutar fuera del proyecto)
+- ./net-pln.sh up --ejecuta todos los comandos necesarios para levantar el servicio,
+creando los contenedores (para ambos casos en necesario Docker en marcha)
+Para dar permisos si es necesario. chmod +x net-pln.sh
+Para monitorizar los logs ejecutamos: ./net-pln.sh monitor-up
+- ./net-pln.sh createChannel  crea el canal
+- ./net-pln.sh deploySmartContract.sh  despliega el smart contract/chaincode
+
+---Aqui estan los repositorios importantes---
+Hyperledger Fabric Releases: https://github.com/hyperledger/fabric/releases
+Hyperledger Fabric CA Releases: https://github.com/hyperledger/fabric-ca/releases
+Hyperledger Fabric GitHub: https://github.com/hyperledger/fabric
+Docker Hub (Hyperledger): https://hub.docker.com/u/hyperledger
+
+Borra y limpia el entorno:
+docker stop $(docker ps -a -q)
+docker rm $(docker ps -a -q) 2>/dev/null
+docker volume prune --all -f BORRA TODOS LOS VOLUMENES EN DOCKER
+docker network prune -f
+sudo rm -rf organizations/peerOrganizations
+sudo rm -rf organizations/ordererOrganizations
+sudo docker rmi $(sudo docker images -q) BORRA TODAS LAS IMAGENES EN DOCKER
+
+echo $CORE_PEER_LOCALMSPID  Para saber en que peer estas
+
+---EL script que me paso Jaime está en reload.sh y está comprobado que funciona bien
+
+sudo rm -rf organizations/peerOrganizations/org1.example.com/msp/keystore
+sudo rm -rf organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp/keystore
+
+
+docker run --rm -ti --name=ctop --volume=/var/run/docker.sock:/var/run/docker.sock quay.io/vektorlab/ctop
+chsh -s /bin/bash
+
+peer lifecycle chaincode package registroAlumnos.tar.gz --path ./chaincodes/registroAlumnos/chaincode-javascript/ --lang node --label registroAlumnos_1.0
