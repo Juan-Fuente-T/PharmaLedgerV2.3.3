@@ -133,6 +133,20 @@ updateAnchorPeers() {
 	fi
 	verifyResult $res "After $MAX_RETRY attempts, peer${PEER}.org${ORG} has failed to update anchor in  the Channel"
 }
+
+verifyChannelMembership() {
+  echo "Verifying channel membership for all peers..."
+  for org in $(seq 1 $TOTAL_ORGS); do
+    setGlobalVars $org
+    docker exec peer0.org${org}.example.com peer channel list > log.txt
+    cat log.txt
+    grep -q "$CHANNEL_NAME" log.txt
+    res=$?
+    verifyResult $res "peer0.org${org} is not joined to channel $CHANNEL_NAME"
+    echo "peer0.org${org} successfully joined $CHANNEL_NAME"
+  done
+}
+
 FABRIC_CFG_PATH=${PWD}/configtx
 
 ## Create channeltx
@@ -155,6 +169,10 @@ joinMultiPeersToChannel
 ## Set the anchor peers for each org in the channel
 echo "Updating anchor peers for org..."
 updateOrgsOnAnchorPeers
+
+## Verify the channel membership for all peers
+echo "Verifying channel membership for all peers..."
+verifyChannelMembership
 
 echo
 echo "========= Pharma Ledger Network (PLN) Channel $CHANNEL_NAME successfully joined =========== "

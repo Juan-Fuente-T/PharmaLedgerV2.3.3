@@ -1,1 +1,2 @@
-[34m2025-03-25 22:32:54.292 CET 0001 INFO[0m [chaincodeCmd] [34;1mchaincodeInvokeOrQuery[0m -> Chaincode invoke successful. result: status:200 
+Committed chaincode definition for chaincode 'pharmaLedgerContract' on channel 'plnchannel':
+Version: 1, Sequence: 1, Endorsement Plugin: escc, Validation Plugin: vscc, Approvals: [Org1MSP: true, Org2MSP: true, Org3MSP: true]

@@ -1,13 +1,13 @@
 /**
-** Juan Fuente Smart Contract Development with Hyperledger Fabric V2
+** O'Reilly - Accelerated Hands-on Smart Contract Development with Hyperledger Fabric V2
 ** farma ledger supply chain network
-**  Author: Juan Fuente
+**  Author: Brian Wu
 ** JS for pharmacy web appication
 **/
 $(document).ready(function(){
   //make sure change to your own machine ip or dmain url
-    var urlBase = "http://localhost:30002";
-  // var urlBase = "http://54.161.38.96:30002";
+    //var urlBase = "http://localhost:30000";
+  var urlBase = "http://54.161.38.96:30002";
   var tabs =["addToWallet", "pharmacyReceived", "query", "queryHistory"];
   $("#queryResult").hide();
   $("#addToWalletLink").click(function(){

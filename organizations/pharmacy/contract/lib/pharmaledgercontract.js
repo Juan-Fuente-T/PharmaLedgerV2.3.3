@@ -13,8 +13,8 @@
  */
 /**
  * farma ledger supply chain network smart contract
- * Juan Fuente Smart Contract Development with Hyperledger Fabric V2
- * Author: Juan Fuente
+ * O'Reilly - Accelerated Hands-on Smart Contract Development with Hyperledger Fabric V2
+ * Author: Brian Wu
  */
 'use strict';
 // Fabric smart contract classes

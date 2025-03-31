@@ -358,6 +358,12 @@ Profiles:
     PharmaLedgerChannel:
         Consortium: PharmaLedgerConsortium
         <<: *ChannelDefaults
+        Orderer:                           
+            <<: *OrdererDefaults          
+            Organizations:               
+                - *OrdererOrg           
+            Capabilities:               
+                <<: *OrdererCapabilities    
         Application:
             <<: *ApplicationDefaults
             Organizations:

@@ -10,6 +10,9 @@ volumes:
   peer0.org1.example.com:
   peer0.org2.example.com:
   peer0.org3.example.com:
+  explorerdb_data:
+  explorer-wallet:
+
 networks:
   pln:
 
@@ -20,10 +23,9 @@ services:
     image: hyperledger/fabric-orderer:$IMAGE_TAG
     environment:
       - FABRIC_LOGGING_SPEC=INFO
+      - ORDERER_GENERAL_LOGLEVEL=INFO
       - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
       - ORDERER_GENERAL_LISTENPORT=7050
-      - ORDERER_GENERAL_GENESISMETHOD=file
-      - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer/orderer.genesis.block
       - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
       - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
       # enabled TLS
@@ -31,6 +33,19 @@ services:
       - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
       - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt
       - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt]
+       # --- Habilitar Channel Participation API (ya está por defecto) ---
+      - ORDERER_CHANNELPARTICIPATION_ENABLED=true
+      # --- Configuración del listener de Admin/Operations (necesario para osnadmin) ---
+      # Usaremos el puerto 7053 por convención para admin, diferente del 7050 para clientes/peers
+      - ORDERER_ADMIN_LISTENADDRESS=0.0.0.0:7053 # Escucha en todas las interfaces en el puerto 7053
+      - ORDERER_ADMIN_TLS_ENABLED=true
+      - ORDERER_ADMIN_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt # Usa el mismo cert TLS del orderer
+      - ORDERER_ADMIN_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key # Usa la misma clave TLS
+      - ORDERER_ADMIN_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt] # CA Raíz para validar clientes (opcional aquí)
+      # Necesitamos CAs de cliente si queremos autenticación mutua (más seguro)
+      - ORDERER_ADMIN_TLS_CLIENTAUTHREQUIRED=true # Requerir que el cliente (osnadmin) se autentique
+      - ORDERER_ADMIN_TLS_CLIENTROOTCAS=[/var/hyperledger/orderer/tls/ca.crt] # CA que firma los certs de cliente válidos (el Admin del Orderer)
+
       - ORDERER_KAFKA_TOPIC_REPLICATIONFACTOR=1
       - ORDERER_KAFKA_VERBOSE=true
       - ORDERER_GENERAL_CLUSTER_CLIENTCERTIFICATE=/var/hyperledger/orderer/tls/server.crt
@@ -39,12 +54,11 @@ services:
     working_dir: /opt/gopath/src/github.com/hyperledger/fabric
     command: orderer
     volumes:
-        - ../system-genesis-block/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
-        - ../organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp:/var/hyperledger/orderer/msp
-        - ../organizations/ordererOrganizations/example.com/orderers/orderer.example.com/tls/:/var/hyperledger/orderer/tls
-        - orderer.example.com:/var/hyperledger/production/orderer
+        - /home/juan/PROGRAMACION/Hyperledger/pharma/pharma-ledger-network/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp:/var/hyperledger/orderer/msp
+        - /home/juan/PROGRAMACION/Hyperledger/pharma/pharma-ledger-network/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/tls/:/var/hyperledger/orderer/tls
     ports:
       - 7050:7050
+      - 7053:7053 
     networks:
       - pln
 
@@ -74,8 +88,8 @@ services:
       - CORE_PEER_LOCALMSPID=Org1MSP
     volumes:
         - /var/run/:/host/var/run/
-        - ../organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/msp:/etc/hyperledger/fabric/msp
-        - ../organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls:/etc/hyperledger/fabric/tls
+        - /home/juan/PROGRAMACION/Hyperledger/pharma/pharma-ledger-network/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/msp:/etc/hyperledger/fabric/msp
+        - /home/juan/PROGRAMACION/Hyperledger/pharma/pharma-ledger-network/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls:/etc/hyperledger/fabric/tls
         - peer0.org1.example.com:/var/hyperledger/production
     working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
     command: peer node start
@@ -111,8 +125,8 @@ services:
       - CORE_PEER_LOCALMSPID=Org2MSP
     volumes:
         - /var/run/:/host/var/run/
-        - ../organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/msp:/etc/hyperledger/fabric/msp
-        - ../organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls:/etc/hyperledger/fabric/tls
+        - /home/juan/PROGRAMACION/Hyperledger/pharma/pharma-ledger-network/organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/msp:/etc/hyperledger/fabric/msp
+        - /home/juan/PROGRAMACION/Hyperledger/pharma/pharma-ledger-network/organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls:/etc/hyperledger/fabric/tls
         - peer0.org2.example.com:/var/hyperledger/production
     working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
     command: peer node start
@@ -148,8 +162,8 @@ services:
       - CORE_PEER_LOCALMSPID=Org3MSP
     volumes:
         - /var/run/:/host/var/run/
-        - ../organizations/peerOrganizations/org3.example.com/peers/peer0.org3.example.com/msp:/etc/hyperledger/fabric/msp
-        - ../organizations/peerOrganizations/org3.example.com/peers/peer0.org3.example.com/tls:/etc/hyperledger/fabric/tls
+        - /home/juan/PROGRAMACION/Hyperledger/pharma/pharma-ledger-network/organizations/peerOrganizations/org3.example.com/peers/peer0.org3.example.com/msp:/etc/hyperledger/fabric/msp
+        - /home/juan/PROGRAMACION/Hyperledger/pharma/pharma-ledger-network/organizations/peerOrganizations/org3.example.com/peers/peer0.org3.example.com/tls:/etc/hyperledger/fabric/tls
         - peer0.org3.example.com:/var/hyperledger/production
     working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
     command: peer node start
@@ -157,3 +171,67 @@ services:
       - 11051:11051
     networks:
       - pln
+# --- Sección agregada para el Explorer en docker-compose-pln-net.yaml ---
+  explorerdb:
+    image: ghcr.io/hyperledger-labs/explorer-db:latest
+    container_name: explorerdb
+    environment:
+      - DATABASE_DATABASE=explorer
+      - DATABASE_USERNAME=hppoc
+      - DATABASE_PASSWORD=explorerdbpass
+    healthcheck:
+      test: "pg_isready -h localhost -p 5432 -q -U postgres"
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    volumes:
+      - explorerdb_data:/var/lib/postgresql/data
+    networks:
+      - pln
+
+  hyperledger-explorer:
+    image: hyperledger/explorer:latest
+    #docker pull ghcr.io/hyperledger-labs/explorer:latest
+    # O si esa no funciona, a veces ghcr.io es más reciente:
+    # image: ghcr.io/hyperledger-labs/explorer:latest
+    # image: ghcr.io/hyperledger-labs/blockchain-explorer:latest
+    # image: ghcr.io/hyperledger-labs/blockchain-explorer:1.1.10 
+    container_name: hyperledger-explorer
+    environment:
+      - DATABASE_HOST=explorerdb
+      - DATABASE_PORT=5432
+      - DATABASE_USERNAME=hppoc 
+      - DATABASE_PASS=explorerdbpass
+      - DATABASE_DATABASE=explorer
+      - LOG_LEVEL_APP=info
+      - LOG_LEVEL_DB=info
+      - LOG_LEVEL_CONSOLE=debug
+      - LOG_CONSOLE_STDOUT=true
+      - DISCOVERY_AS_LOCALHOST=false
+      - PORT=8080
+      - EXPLORER_CONFIG_FILE_PATH=/opt/explorer/app/platform/fabric/config.json # Ruta por defecto
+      - EXPLORER_PROFILE_DIR_PATH=/opt/explorer/app/platform/fabric/connection-profile # Ruta por defecto
+      # Variables para conectar con Fabric
+      - CORE_PEER_LOCALMSPID=Org1MSP
+      - CORE_PEER_ADDRESS=peer0.org1.example.com:7051
+      #bien
+      - ORDERER_ADDRESS=orderer.example.com:7050
+      #bien
+      - FABRIC_CA_CLIENT_TLS_CERTFILES=/var/hyperledger/orderer/tls/ca.crt
+      #bien
+      - FABRIC_CA_CLIENT_HOME=/var/hyperledger/orderer/msp
+      - FABRIC_CHANNEL=plnchannel
+      - FABRIC_CLIENT_CONFIG_FILE=./explorer-config/network-profile.json
+    ports:
+    - "8080:8080"
+    depends_on:
+      explorerdb: 
+        condition: service_healthy
+    volumes:
+      - /home/juan/PROGRAMACION/Hyperledger/pharma/pharma-ledger-network/explorer/config.json:/opt/explorer/app/platform/fabric/config.json
+      - /home/juan/PROGRAMACION/Hyperledger/pharma/pharma-ledger-network/organizations/peerOrganizations/org1.example.com/connection-org1.json:/opt/explorer/app/platform/fabric/connection-profile/pln_connection.json 
+      - /home/juan/PROGRAMACION/Hyperledger/pharma/pharma-ledger-network/organizations:/opt/explorer/app/platform/fabric/organizations 
+      - /home/juan/PROGRAMACION/Hyperledger/pharma/pharma-ledger-network/wallet:/opt/explorer/wallet 
+    networks:
+      - pln
+    command: sh -c "echo '--- CONTENIDO config.json MONTADO ---'; cat /opt/explorer/app/platform/fabric/config.json; echo '--- FIN config.json ---'; echo '>>> LISTANDO WALLET MONTADA <<<'; ls -la /opt/explorer/wallet; echo '>>> FIN LISTADO WALLET <<<'; /opt/explorer/start.sh" 

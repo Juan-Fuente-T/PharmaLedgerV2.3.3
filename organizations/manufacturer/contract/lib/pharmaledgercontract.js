@@ -13,11 +13,12 @@
  */
 /**
  * farma ledger supply chain network smart contract
- * Juan Fuente Smart Contract Development with Hyperledger Fabric V2
- * Author: Juan Fuente
+ * O'Reilly - Accelerated Hands-on Smart Contract Development with Hyperledger Fabric V2
+ * Author: Brian Wu
  */
 'use strict';
 // Fabric smart contract classes
+// Necesaries to create a smart contract and interact with the ledger
 const { Contract, Context } = require('fabric-contract-api');
 
 /**
@@ -79,6 +80,7 @@ class PharmaLedgerContract extends Contract {
         }
         let dt = new Date().toString();
         const strValue = Buffer.from(equipmentAsBytes).toString('utf8');
+        console.info("equipmentAsBytes toString('utf8'): " + Buffer.from(equipmentAsBytes).toString('utf8'));
         let record;
         try {
             record = JSON.parse(strValue);
@@ -93,6 +95,7 @@ class PharmaLedgerContract extends Contract {
             console.log(err);
             throw new Error(`equipmet ${equipmentNumber} data can't be processed`);
         }
+        console.info('equipmentNumber jason.stringify(record): '+ Buffer.from(JSON.stringify(record)));
         await ctx.stub.putState(equipmentNumber, Buffer.from(JSON.stringify(record)));
         console.info('============= END : wolesalerDistribute  ===========');
    }
@@ -106,6 +109,7 @@ class PharmaLedgerContract extends Contract {
    async pharmacyReceived(ctx, equipmentNumber, ownerName) {
         console.info('============= START : pharmacyReceived call ===========');
         const equipmentAsBytes = await ctx.stub.getState(equipmentNumber);
+        console.info("equipmentAsBytes toString('utf8'): " + Buffer.from(equipmentAsBytes).toString('utf8'));
         if (!equipmentAsBytes || equipmentAsBytes.length === 0) {
             throw new Error(`${equipmentNumber} does not exist`);
         }

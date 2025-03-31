@@ -1,14 +1,10 @@
 /*
- # Juan Fuente Smart Contract Development with Hyperledger Fabric V2
+ # O'Reilly - Accelerated Hands-on Smart Contract Development with Hyperledger Fabric V2
  # farma ledger supply chain network
- # Author: Juan Fuente
+ # Author: Brian Wu
  # App.js load application server:
  */
 'use strict';
-const path = require('path');
-process.env.NODE_PATH = path.resolve(__dirname, 'node_modules');
-require('module').Module._initPaths();
-
 const express = require('express')
 const app = express()
 app.set('view engine', 'ejs')
@@ -23,7 +19,7 @@ const yaml = require('js-yaml');
 app.use(express.static('public'))
 
 const { Wallets } = require('fabric-network');
-// const path = require('path');
+const path = require('path');
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 var cache = require('memory-cache');
@@ -113,6 +109,5 @@ var port = process.env.PORT || 30002;
 var server = app.listen(port, function () {
    var host = server.address().address
    var port = server.address().port
-  //  console.log("App listening at http://%s:%s", host, port)
-  console.log("App listening at http://localhost:", port)
+   console.log("App listening at http://%s:%s", host, port)
 })

@@ -1,7 +1,7 @@
 /*
- # Juan Fuente Smart Contract Development with Hyperledger Fabric V2
+ # O'Reilly - Accelerated Hands-on Smart Contract Development with Hyperledger Fabric V2
  # farma ledger supply chain network
- # Author: Juan Fuente
+ # Author: Brian Wu
  # App.js load application server:
  */
 'use strict';
@@ -111,6 +111,5 @@ var port = process.env.PORT || 30000;
 var server = app.listen(port, function () {
    var host = server.address().address
    var port = server.address().port
-  //  console.log("App listening at http://%s:%s", host, port)
-   console.log("App listening at http://localhost:", port)
+   console.log("App listening at http://%s:%s", host, port)
 })

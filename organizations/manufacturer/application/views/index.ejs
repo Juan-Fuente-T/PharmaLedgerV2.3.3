@@ -1,14 +1,14 @@
 
-<!--Juan Fuente Smart Contract Development with Hyperledger Fabric V2
+<!--O'Reilly - Accelerated Hands-on Smart Contract Development with Hyperledger Fabric V2
  # farma ledger supply chain network
- # Author: Juan Fuente
+ # Author: Brian Wu
  # load application page
 -->
 <html>
   <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Hyperledger Fabric V2</title>
+    <title>O'Reilly - Accelerated Hands-on Smart Contract Development with Hyperledger Fabric V2</title>
     <!--Import Google Icon Font-->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
@@ -22,10 +22,8 @@
     <script src="/js/plnClient.js"></script>
   </head>
 <body>
-  <!-- <nav class="navbar navbar-light navbar-light" style="background-color: #343a40;margin-top: -3px;"> -->
-  <nav class="navbar navbar-light">
-    <!-- <span class="navbar-brand text-white">Manufacturer (Org1)</span> -->
-    <span class="navbar-brand">Manufacturer (Org1)</span>
+  <nav class="navbar navbar-light navbar-light" style="background-color: #343a40;margin-top: -3px;">
+    <span class="navbar-brand text-white">Manufacturer (Org1)</span>
   </nav>
   <nav class="navbar navbar-default" role="navigation">
 	<div class="container">
@@ -41,7 +39,7 @@
 		           <a id="menu3" href="#query"><i class="fa fa-search menuIcon"></i>Query</a>
 		    	</li>
           <li id="queryHistoryLink" class="nav-menu">
-               <a id="menu4" href="#queryHistory"><i class="fa fa fa-history menuIcon"></i>Query History</a>
+               <a id="menu3" href="#queryHistory"><i class="fa fa fa-history menuIcon"></i>Query History</a>
           </li>
 		   </ul>
 		</div>
@@ -51,20 +49,20 @@
 <div class="tab-content page-content">
     <!-- addToWallet --->
     <div class="tab-pane active text-style" id="addToWalletTab">
-      <div class="alert alert-info" role="alert">
+      <div class="alert alert-primary" role="alert">
          <h4>Add User To Wallet</h4>
       </div>
 		<form>
 		  <div class="form-group">
 		    <input type="text" class="form-control" id="user" placeholder="Enter User">
 		  </div>
-		  <button id="addUser" type="submit" class="btn btn-primary">Add User</button>
+		  <button id="addUser" type="submit" class="btn btn-success">Add User</button>
 		</form>
     <hr>
     </div>
     <!-- makeEquipment --->
     <div class="tab-pane text-style" id="makeEquipmentTab">
-      <div class="alert alert-info" role="alert">
+      <div class="alert alert-primary" role="alert">
          <h4>Make Equipment</h4>
       </div>
       	<form>
@@ -77,13 +75,13 @@
       	  <div class="form-group row">
       	    <label for="equipmentNumber" class="col-sm-2 col-form-label">Equipment Number</label>
       	    <div class="col-sm-10">
-      	      <input type="text" class="form-control" id="equipmentNumber" placeholder="Enter Equipment Number">
+      	      <input type="text" class="form-control" id="equipmentNumber" value="2000.002">
       	    </div>
       	  </div>
       	  <div class="form-group row">
       	    <label for="equipmentName" class="col-sm-2 col-form-label">Equipment Name</label>
       	    <div class="col-sm-10">
-      	      <input type="text" class="form-control" id="equipmentName" placeholder="Enter Equipment Name">
+      	      <input type="text" class="form-control" id="equipmentName" value="e360-Ventilator">
       	    </div>
       	  </div>
       	  <div class="form-group row">
@@ -92,25 +90,25 @@
       	      <input type="text" class="form-control" id="ownerName" value="GlobalEquipmentCorp">
       	    </div>
       	  </div>
-      	  <button type="submit" id="makeEquipment" class="btn btn-primary mb-2">Submit</button>
+      	  <button type="submit" id="makeEquipment" class="btn btn-success mb-2">Submit</button>
       	</form>
        <hr>
     </div>
     <!-- query --->
   <div class="tab-pane text-style" id="queryTab">
-        <div class="alert alert-info" role="alert">
+        <div class="alert alert-primary" role="alert">
            <h4>Query supply chain data</h4>
         </div>
        <form>
     	   <div class="form-group">
     		<input type="text" class="form-control" id="queryKey" placeholder="Enter Key">
     	   </div>
-    	   <button id="query" type="submit" class="btn btn-primary">Query</button>
+    	   <button id="query" type="submit" class="btn btn-success">Query</button>
 	    </form>
        <hr>
        <div id="queryResult">
            <h4 class="display-5 text-center">Query Result</h4>
-           <table class="table table-striped table-md">
+           <table class="table table-striped table-sm">
               <tbody>
                 <tr>
                   <th scope="row">QueryKey</th>
@@ -157,19 +155,19 @@
     </div>
     <!-- query history --->
   <div class="tab-pane text-style" id="queryHistoryTab">
-        <div class="alert alert-info" role="alert">
+        <div class="alert alert-primary" role="alert">
            <h4>Query supply chain history data</h4>
         </div>
        <form>
          <div class="form-group">
         <input type="text" class="form-control" id="queryHistoryKey" placeholder="Enter Key">
          </div>
-         <button id="queryHistory" type="submit" class="btn btn-primary">Query History</button>
+         <button id="queryHistory" type="submit" class="btn btn-success">Query History</button>
       </form>
        <hr>
        <div id="queryHistoryResult">
            <h4 class="display-5 text-center">Query History Result</h4>
-           <table id="historyTable" class="table table-striped table-md">
+           <table id="historyTable" class="table table-striped table-sm">
              <thead>
                <tr>
                  <th scope="col">QueryKey</th>

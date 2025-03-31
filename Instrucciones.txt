@@ -28,6 +28,8 @@ sudo docker rmi $(sudo docker images -q) BORRA TODAS LAS IMAGENES EN DOCKER
 echo $CORE_PEER_LOCALMSPID  Para saber en que peer estas
 
 ---EL script que me paso Jaime está en reload.sh y está comprobado que funciona bien
+Esto muestra los logs del explorer:
+docker logs hyperledger-explorer -f
 
 sudo rm -rf organizations/peerOrganizations/org1.example.com/msp/keystore
 sudo rm -rf organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp/keystore
@@ -37,3 +39,40 @@ docker run --rm -ti --name=ctop --volume=/var/run/docker.sock:/var/run/docker.so
 chsh -s /bin/bash
 
 peer lifecycle chaincode package registroAlumnos.tar.gz --path ./chaincodes/registroAlumnos/chaincode-javascript/ --lang node --label registroAlumnos_1.0
+
+
+
+# Elimina todo completamente
+docker-compose -f docker-compose-pln-net.yaml down -v
+# 2. Elimina los volúmenes corruptos
+docker volume prune -f
+   sudo rm -rf ../walletstore/*
+sudo rm -rf ../walletstore   
+# 3. Reconstruye con permisos
+mkdir -p ../walletstore
+chmod -R 777 ../walletstore
+   sudo chown -R $USER:$USER ../walletstore
+docker-compose -f docker-compose-pln-net.yaml up -d
+
+
+docker-compose -f docker-compose-pln-net.yaml down -v
+docker-compose -f docker-compose-pln-net.yaml up -d
+docker logs hyperledger-explorer
+
+# Baja todo
+./net-pln.sh down
+# Limpia contenedores/redes/volúmenes anónimos
+docker stop $(docker ps -a -q) 2>/dev/null
+docker rm $(docker ps -a -q) 2>/dev/null
+docker network prune -f
+docker volume prune -f
+# Limpia volúmenes nombrados de Explorer (¡ASEGÚRATE DE LOS NOMBRES!)
+docker volume rm explorer-wallet net_explorerdb_data # O como se llamen
+# Limpia artefactos locales
+sudo rm -rf organizations/peerOrganizations organizations/ordererOrganizations channel-artifacts wallet system-genesis-block
+
+
+docker cp hyperledger-explorer:/opt/explorer/app/platform/fabric/config.json ./explorer-config.json
+nano explorer-config.json
+
+

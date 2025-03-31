@@ -1,0 +1,39 @@
+{
+    "platform": "fabric",
+    "network-configs": {
+      "pln-network": { 
+        "name": "pln-network", 
+        "profile": "/opt/explorer/app/platform/fabric/connection-profile/pln_connection.json", 
+        "enableAuthentication": false,
+        "client": {
+          "organization": "Org1", 
+          "credentialStore": {
+            "path": "/opt/explorer/wallet", 
+            "wallet": "wallet" 
+          },
+          "adminCredential": {
+            "id": "admin", 
+            "password": "adminpw" 
+          },
+          "connectionOptions": {
+            "grpc.keepalive_time_ms": 120000,
+            "grpc.keepalive_timeout_ms": 20000,
+            "grpc.keepalive_permit_without_calls": 1
+          }
+        }
+      }
+    },
+    "default-network": "pln-network",
+    "database": {
+      "type": "postgres",
+      "host": "explorerdb",
+      "port": "5432",
+      "username": "hppoc", 
+      "password": "explorerdbpass", 
+      "database": "explorer" 
+    },
+    "sync": {
+      "type": "channel", 
+      "interval": 10000
+    }
+ }

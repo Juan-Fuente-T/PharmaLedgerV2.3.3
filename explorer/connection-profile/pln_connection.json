@@ -1,0 +1,52 @@
+{
+  "name": "pln",
+  "version": "1.0.0",
+  "channels": {
+    "plnchannel": {
+      "orderers": [
+        "orderer.example.com"
+      ],
+      "peers": {
+        "peer0.org1.example.com": {},
+        "peer0.org2.example.com": {},
+        "peer0.org3.example.com": {}
+      }
+    }
+  },
+  "organizations": {
+    "Org1": {
+      "mspid": "Org1MSP",
+      "peers": [
+        "peer0.org1.example.com"
+      ]
+    }
+  },
+  "orderers": {
+    "orderer.example.com": {
+      "url": "grpcs://orderer.example.com:7050",
+      "tlsCACerts": {
+        "path": "/opt/explorer/app/platform/fabric/organizations/ordererOrganizations/example.com/tlsca/tlsca.example.com-cert.pem"
+      }
+    }
+  },
+  "peers": {
+    "peer0.org1.example.com": {
+      "url": "grpcs://peer0.org1.example.com:7051",
+      "tlsCACerts": {
+        "path": "/opt/explorer/app/platform/fabric/organizations/peerOrganizations/org1.example.com/tlsca/tlsca.org1.example.com-cert.pem"
+      }
+    },
+    "peer0.org2.example.com": {
+      "url": "grpcs://peer0.org2.example.com:9051",
+      "tlsCACerts": {
+        "path": "/opt/explorer/app/platform/fabric/organizations/peerOrganizations/org2.example.com/tlsca/tlsca.org2.example.com-cert.pem"
+      }
+    },
+    "peer0.org3.example.com": {
+      "url": "grpcs://peer0.org3.example.com:11051",
+      "tlsCACerts": {
+        "path": "/opt/explorer/app/platform/fabric/organizations/peerOrganizations/org3.example.com/tlsca/tlsca.org3.example.com-cert.pem"
+      }
+    }
+  }
+}
