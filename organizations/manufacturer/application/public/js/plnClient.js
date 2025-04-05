@@ -1,7 +1,7 @@
 /**
-** O'Reilly - Accelerated Hands-on Smart Contract Development with Hyperledger Fabric V2
+** Hyperledger Smart Contract Development with Hyperledger Fabric V2
 ** farma ledger supply chain network
-**  Author: Brian Wu
+**  Author: Juan Fuente
 ** JS for manufacturer web appication
 **/
 $(document).ready(function(){

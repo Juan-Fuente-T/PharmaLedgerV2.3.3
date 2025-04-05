@@ -81,3 +81,4 @@ typings/
 /organizations/peerOrganizations
 /system-genesis-block
 *.log
+*/package-lock.json

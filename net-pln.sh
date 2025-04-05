@@ -7,8 +7,42 @@
 # MODIFICADO: Asegurarse que estas variables no interfieran si son seteadas por el script que llama (reload.sh)
 # export PATH=${PWD}/../bin:${PWD}:$PATH # Comentado: reload.sh ya debería setear el PATH
 # export FABRIC_CFG_PATH=${PWD}/configtx # Comentado: reload.sh ya debería setear FABRIC_CFG_PATH
+# Carga .env si existe
+[ -f .env ] && source .env
 export VERBOSE=false
 export COMPOSE_PROJECT_NAME="net"
+# Default image tag para peers y tools
+IMAGETAG="${IMAGE_TAG:-2.5.12}"  # Usa IMAGE_TAG del .env o 2.5.12 como fallback
+export IMAGE_TAG=$IMAGETAG  # Exportar para docker-compose
+echo "INFO: Using image tag: ${IMAGE_TAG}"
+# Default CA image tag (si usas CA, si no, déjalo comentado)
+CA_IMAGETAG="${CA_IMAGE_TAG:-2.5.12}"  # Usa CA_IMAGE_TAG del .env o 2.5.12 como fallback
+# export CA_IMAGE_TAG=$CA_IMAGETAG  # Descomenta si usas COMPOSE_FILE_CA
+# Obtain the OS and Architecture string that will be used to select the correct
+# native binaries for your platform, e.g., darwin-amd64 or linux-amd64
+OS_ARCH=$(echo "$(uname -s | tr '[:upper:]' '[:lower:]' | sed 's/mingw64_nt.*/windows/')-$(uname -m | sed 's/x86_64/amd64/g')" | awk '{print tolower($0)}')
+# Using cryptogen vs CA. default is cryptogen
+CRYPTO="cryptogen"
+# timeout duration - the duration the CLI should wait for a response from
+# another container before giving up
+MAX_RETRY=5
+# default for delay between commands
+CLI_DELAY=3
+# channel name defaults to "plnchannel"
+CHANNEL_NAME="plnchannel"
+# use this as the default docker-compose yaml definition
+COMPOSE_FILE_BASE=docker/docker-compose-pln-net.yaml
+# certificate authorities compose file (si se usara)
+# COMPOSE_FILE_CA=docker/docker-compose-ca.yaml
+# CouchDB compose file (si se usara)
+COMPOSE_FILE_COUCH=docker/docker-compose-couch.yaml
+# use golang as the default language for chaincode
+CC_SRC_LANGUAGE=javascript
+# Chaincode version
+VERSION=1
+# default database
+DATABASE="leveldb"
+
 # Print the usage message
 function printHelp() {
   echo "Usage: "
@@ -89,7 +123,7 @@ function checkPrereqs() {
 
   LOCAL_VERSION=$(peer version | sed -ne 's/ Version: //p')
   # MODIFICADO: Asegurarse que IMAGETAG está definido (puede venir de flags o default)
-  DOCKER_IMAGE_VERSION=$(docker run --rm hyperledger/fabric-tools:${IMAGETAG:-latest} peer version | sed -ne 's/ Version: //p' | head -1)
+  DOCKER_IMAGE_VERSION=$(docker run --rm hyperledger/fabric-tools:${IMAGETAG} peer version | sed -ne 's/ Version: //p' | head -1)
 
 
   echo "LOCAL_VERSION=$LOCAL_VERSION"
@@ -261,11 +295,9 @@ function networkUp() {
     COMPOSE_FILES="${COMPOSE_FILES} -f ${COMPOSE_FILE_COUCH}"
   fi
 
-  # MODIFICADO: Usar IMAGETAG provisto o el default 'latest'
-  IMAGE_TAG=${IMAGETAG:-latest}
   echo "INFO: Using image tag: ${IMAGE_TAG}"
   # Asegurarse que el tag se pasa a docker-compose
-  export IMAGE_TAG # Exportar la variable para que docker-compose la use
+  export IMAGE_TAG=$IMAGETAG # Exportar la variable para que docker-compose la use
 
   # MODIFICADO: Llamada directa a docker-compose up
   echo "INFO: Starting Fabric network containers using compose files: ${COMPOSE_FILES}"
@@ -381,36 +413,6 @@ function networkDown() {
   fi
   echo "INFO: Network teardown complete."
 }
-
-# Obtain the OS and Architecture string that will be used to select the correct
-# native binaries for your platform, e.g., darwin-amd64 or linux-amd64
-OS_ARCH=$(echo "$(uname -s | tr '[:upper:]' '[:lower:]' | sed 's/mingw64_nt.*/windows/')-$(uname -m | sed 's/x86_64/amd64/g')" | awk '{print tolower($0)}')
-# Using crpto vs CA. default is cryptogen
-CRYPTO="cryptogen"
-# timeout duration - the duration the CLI should wait for a response from
-# another container before giving up
-MAX_RETRY=5
-# default for delay between commands
-CLI_DELAY=3
-# channel name defaults to "plnchannel"
-CHANNEL_NAME="plnchannel"
-# use this as the default docker-compose yaml definition
-COMPOSE_FILE_BASE=docker/docker-compose-pln-net.yaml
-# certificate authorities compose file (si se usara)
-# COMPOSE_FILE_CA=docker/docker-compose-ca.yaml
-# CouchDB compose file (si se usara)
-COMPOSE_FILE_COUCH=docker/docker-compose-couch.yaml # Asegúrate que este path es correcto si usas CouchDB
-# use golang as the default language for chaincode
-CC_SRC_LANGUAGE=javascript
-# Chaincode version
-VERSION=1
-# default image tag
-IMAGETAG="latest"
-# default ca image tag
-# CA_IMAGETAG="1.4.6"
-CA_IMAGETAG="latest"
-# default database
-DATABASE="leveldb" # MODIFICADO: Asegúrate que coincide con tu configtx.yaml y docker-compose si usas CouchDB
 
 # Parse commandline args
 

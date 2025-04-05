@@ -1,2 +1,1 @@
-Committed chaincode definition for chaincode 'pharmaLedgerContract' on channel 'plnchannel':
-Version: 1, Sequence: 1, Endorsement Plugin: escc, Validation Plugin: vscc, Approvals: [Org1MSP: true, Org2MSP: true, Org3MSP: true]
+Error: endorsement failure during invoke. response: status:500 message:"error in simulation: failed to execute transaction 501d2e6561c76c7182d6b39455430ca61571edb2857ca54ef6dc6ba4907845bd: could not launch chaincode pharmaLedgerContract_1:76e7d4928180643d5d8e2f1389669c3ead1207e6c3d7e575b9d1e65dca2bfbf4: chaincode registration failed: container exited with 0" 

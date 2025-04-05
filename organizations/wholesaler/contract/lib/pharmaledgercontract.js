@@ -13,13 +13,13 @@
  */
 /**
  * farma ledger supply chain network smart contract
- * O'Reilly - Accelerated Hands-on Smart Contract Development with Hyperledger Fabric V2
- * Author: Brian Wu
+ * Hyperledger Smart Contract Development with Hyperledger Fabric V2
+ * Author: Juan Fuente
  */
 'use strict';
 // Fabric smart contract classes
 const { Contract, Context } = require('fabric-contract-api');
-
+console.log('Chaincode starting...');
 /**
  * Define PharmaLedger smart contract by extending Fabric Contract class
  *
@@ -29,6 +29,7 @@ class PharmaLedgerContract extends Contract {
     constructor() {
         // Unique namespace pcn - PharmaChainNetwork when multiple contracts per chaincode file
         super('org.pln.PharmaLedgerContract');
+        console.log('Chaincode constructor called');
     }
     /**
      * Instantiate to set up ledger.

@@ -14,7 +14,7 @@
 /**
  * farma supply chain network smart contract - index  
  * Accelerated Hands-on Smart Contract Development with Hyperledger Fabric V2
- * Author: Brian Wu
+ * Author: Juan Fuente
  */
 'use strict';
 

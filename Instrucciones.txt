@@ -75,4 +75,15 @@ sudo rm -rf organizations/peerOrganizations organizations/ordererOrganizations c
 docker cp hyperledger-explorer:/opt/explorer/app/platform/fabric/config.json ./explorer-config.json
 nano explorer-config.json
 
+- ELIMINAR DE LA GUI DE GIT LOS Zone.Identifier
+Get-ChildItem -Recurse | Unblock-File
+- Comprobar que no quede nada, si no sale nada esta limpio:
+dir -r | Where-Object { $_.Name -like "*:Zone.Identifier" }
 
+LLAMAR A LAS FUNCIONES
+export PATH=/home/juan/PROGRAMACION/Hyperledger/pharma/bin:$PATH
+export FABRIC_CFG_PATH=${PWD}/configtx
+-Verifica (opcional)
+ls $FABRIC_CFG_PATH/core.yaml
+echo $FABRIC_CFG_PATH
+./net-pln.sh invoke query 2000.001

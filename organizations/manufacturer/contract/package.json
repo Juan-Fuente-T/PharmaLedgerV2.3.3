@@ -2,7 +2,7 @@
     "name": "pharmaledger-js",
     "version": "1.0.0",
     "description": "PharmaLedger contract implemented in JavaScript",
-    "main": "index.js",
+    "main": "lib/pharmaledgercontract.js",
     "engines": {
         "node": ">=8",
         "npm": ">=5"
@@ -11,10 +11,10 @@
         "lint": "eslint .",
         "pretest": "npm run lint",
         "test": "nyc mocha --recursive",
-        "start": "fabric-chaincode-node start"
+        "start": "node lib/pharmaledgercontract.js"
     },
     "engineStrict": true,
-    "author": "brian",
+    "author": "Juan Fuente",
     "license": "Apache-2.0",
     "dependencies": {
         "fabric-contract-api": "^2.1.2",

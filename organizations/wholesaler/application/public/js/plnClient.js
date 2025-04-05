@@ -1,13 +1,13 @@
 /**
-** O'Reilly - Accelerated Hands-on Smart Contract Development with Hyperledger Fabric V2
+** Hyperledger Smart Contract Development with Hyperledger Fabric V2
 ** farma ledger supply chain network
-**  Author: Brian Wu
+**  Author: Juan Fuente
 ** JS for wholesaler web appication
 **/
 $(document).ready(function(){
      //make sure change to your own machine ip or dmain url
-    //var urlBase = "http://localhost:30001";
-    var urlBase = "http://54.161.38.96:30001";
+    var urlBase = "http://localhost:30001";
+    // var urlBase = "http://54.161.38.96:30001";
      var tabs =["addToWallet", "wholesalerDistribute", "query", "queryHistory"];
      $("#queryResult").hide();
      $("#addToWalletLink").click(function(){

@@ -341,20 +341,32 @@ Channel: &ChannelDefaults
 ################################################################################
 Profiles:
 
-    PharmaLedgerOrdererGenesis:
-        <<: *ChannelDefaults
-        Orderer:
-            <<: *OrdererDefaults
-            Organizations:
-                - *OrdererOrg
-            Capabilities:
-                <<: *OrdererCapabilities
-        Consortiums:
-            PharmaLedgerConsortium:
-                Organizations:
-                    - *Org1
-                    - *Org2
-                    - *Org3
+    # PharmaLedgerOrdererGenesis:
+    #     <<: *ChannelDefaults
+    #     Orderer:
+    #         <<: *OrdererDefaults
+    #         Organizations:
+    #             - *OrdererOrg
+    #         Capabilities:
+    #             <<: *OrdererCapabilities
+    #     Consortiums:
+    #         PharmaLedgerConsortium:
+    #             Organizations:
+    #                 - *Org1
+    #                 - *Org2
+    #                 - *Org3
+
+    # PharmaLedgerChannel:
+    #         <<: *ChannelDefaults
+    #         Consortium: PharmaLedgerConsortium 
+
+    #         Application:
+    #             <<: *ApplicationDefaults
+    #             Organizations:
+    #                 - <<: *Org1
+    #                 - <<: *Org2
+    #                 - <<: *Org3
+
     PharmaLedgerChannel:
         Consortium: PharmaLedgerConsortium
         <<: *ChannelDefaults

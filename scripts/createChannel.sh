@@ -2,7 +2,7 @@
 
 # Juan Fuente Smart Contract Development with Hyperledger Fabric V2
 # farma ledger supply chain network
-# Author: Brian Wu
+# Author: Juan Fuente
 # create channel
 
 CHANNEL_NAME="$1"

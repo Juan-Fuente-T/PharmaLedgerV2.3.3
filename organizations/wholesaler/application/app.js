@@ -1,7 +1,7 @@
 /*
- # O'Reilly - Accelerated Hands-on Smart Contract Development with Hyperledger Fabric V2
+ #Hyperledger Smart Contract Development with Hyperledger Fabric V2
  # farma ledger supply chain network
- # Author: Brian Wu
+ # Author: Juan Fuente
  # App.js load application server:
  */
 'use strict';
@@ -74,7 +74,7 @@ app.post('/wholesalerDistribute', async (req, res, next) => {
 app.get('/queryHistoryByKey', async (req, res, next) => {
   console.log(req.body);
   var userName = cache.get('userName')
-  //var userName = "brian";
+  //var userName = ;
   let key = req.query.key;
   try {
     if(!userName || userName.lenth<1) {
@@ -91,7 +91,7 @@ app.get('/queryHistoryByKey', async (req, res, next) => {
 app.get('/queryByKey', async (req, res, next) => {
   console.log(req.body);
   var userName = cache.get('userName')
-  //var userName = "brian";
+  //var userName = ;
   let key = req.query.key;
   try {
     if(!userName || userName.lenth<1) {
