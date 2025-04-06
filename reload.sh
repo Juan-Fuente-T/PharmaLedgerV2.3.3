@@ -1,6 +1,6 @@
 # Script para reiniciar la red de Hyperledger Fabric y realizar tareas de limpieza y configuración.
 
-Instalar NVM y Node.js
+# Instalar NVM y Node.js
 nvm install 14.21.3
 nvm use 14.21.3
 nvm alias default 14
@@ -15,6 +15,7 @@ nvm alias default 14
 # ---- Configuración ----
 export FABRIC_CFG_PATH=${PWD}/configtx
 export PATH=${PWD}/../bin:${PWD}:$PATH
+echo "****** FABRIC_CFG_PATH is set to: ${FABRIC_CFG_PATH} ******"
 
 # Variables reutilizables
 # export CHANNEL_NAME="plnchannel"
@@ -88,19 +89,22 @@ mkdir -p ./wallet/admin
 cp "$ADMIN_KEY_FILE" ./wallet/admin/private_key
 cp ./organizations/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/signcerts/Admin@org1.example.com-cert.pem ./wallet/admin/certificate
 
-# ---- Generar Bloque Génesis del Canal ----
-echo "****** Generando bloque génesis del canal... ******"
-configtxgen -profile PharmaLedgerChannel -outputBlock ./channel-artifacts/plnchannel.block -channelID plnchannel
+# ---- Generación de Artefactos de Canal ----
+echo "****** Generando bloque génesis del canal del sistema... ******"
+configtxgen -profile PharmaLedgerOrdererGenesis -outputBlock ./system-genesis-block/genesis.block -channelID system-channel 
+echo "****** Contenido de system-genesis-block: ******"
+ls -la ./system-genesis-block
 
-# ---- Levantar la Red ----
+# ---- Levantando la red Fabric (contenedores) ----
 echo "****** Levantando la red Fabric (contenedores)... ******"
 ./net-pln.sh up
 echo "Esperando a que los contenedores se estabilicen (15s)..."
 sleep 15
 
-# ---- Unir Orderer al Canal ----
+# ---- Unir Orderer al Canal del sistema----
 echo "****** Haciendo que Orderer se una al canal ${CHANNEL_NAME}... ******"
-osnadmin channel join --channelID plnchannel --config-block ./channel-artifacts/plnchannel.block -o localhost:7053 --ca-file "${ORDERER_CA}" --client-cert "${ORDERER_ADMIN_TLS_SIGN_CERT}" --client-key "${ORDERER_ADMIN_TLS_PRIVATE_KEY}"
+osnadmin channel join --channelID system-channel --config-block ./system-genesis-block/genesis.block -o localhost:7053 --ca-file "${ORDERER_CA}" --client-cert "${ORDERER_ADMIN_TLS_SIGN_CERT}" --client-key "${ORDERER_ADMIN_TLS_PRIVATE_KEY}"
+# echo "****** Variables para el plnChannel ${ORDERER_CA}...${ORDERER_ADMIN_TLS_SIGN_CERT}...${ORDERER_ADMIN_TLS_PRIVATE_KEY} ******"
 # osnadmin channel join --channelID plnchannel --config-block ./channel-artifacts/plnchannel.block -o localhost:7053 --ca-file "${ORDERER_CA}"
 # osnadmin channel join --channelID ${CHANNEL_NAME} --config-block ./channel-artifacts/${CHANNEL_NAME}.block -o localhost:7053 --ca-file "${ORDERER_CA}"
 if [ $? -ne 0 ]; then
@@ -108,6 +112,23 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 echo "****** Orderer unido al canal ${CHANNEL_NAME} ******"
+sleep 5
+
+
+# ---- Generar Bloque Génesis del Canal de Aplicación ----
+echo "****** Generando bloque génesis del canal ${CHANNEL_NAME}... ******"
+configtxgen -profile PharmaLedgerChannel -outputBlock ./channel-artifacts/plnchannel.block -channelID plnchannel
+
+# ---- Unir Orderer al Canal de Aplicación ----
+echo "****** Haciendo que Orderer se una al canal ${CHANNEL_NAME}... ******"
+osnadmin channel join --channelID plnchannel --config-block ./channel-artifacts/plnchannel.block -o localhost:7053 --ca-file "${ORDERER_CA}" --client-cert "${ORDERER_ADMIN_TLS_SIGN_CERT}" --client-key "${ORDERER_ADMIN_TLS_PRIVATE_KEY}"
+if [ $? -ne 0 ]; then
+  echo "ERROR: Fallo al unir el orderer al canal ${CHANNEL_NAME}"
+  exit 1
+fi
+echo "****** Orderer unido al canal ${CHANNEL_NAME} ******"
+echo "****** Contenido de channel-artifacts: ******"
+ls -la ./channel-artifacts
 sleep 5
 
 # ---- Unir Peers al Canal ----
@@ -123,8 +144,8 @@ for i in $(seq 1 $ATTEMPTS); do
         echo "Peer unido al canal después de $i intentos."
         break
     fi
-    echo "Fallo al unir el peer al canal. Intentando de nuevo en $DELAY segundos..."
-    sleep $DELAY
+    echo "Fallo al unir el peer al canal. Intentando de nuevo en 3 segundos..."
+    sleep 3
 done
 if [ $? -ne 0 ]; then
     echo "ERROR: Fallo al unir el peer al canal después de $ATTEMPTS intentos."
@@ -143,8 +164,8 @@ for i in $(seq 1 $ATTEMPTS); do
         echo "Peer unido al canal después de $i intentos."
         break
     fi
-    echo "Fallo al unir el peer al canal. Intentando de nuevo en $DELAY segundos..."
-    sleep $DELAY
+    echo "Fallo al unir el peer al canal. Intentando de nuevo en 3 segundos..."
+    sleep 3
 done
 if [ $? -ne 0 ]; then
     echo "ERROR: Fallo al unir el peer al canal después de $ATTEMPTS intentos."
@@ -163,8 +184,8 @@ for i in $(seq 1 $ATTEMPTS); do
         echo "Peer unido al canal después de $i intentos."
         break
     fi
-    echo "Fallo al unir el peer al canal. Intentando de nuevo en $DELAY segundos..."
-    sleep $DELAY
+    echo "Fallo al unir el peer al canal. Intentando de nuevo en 3 segundos..."
+    sleep 3
 done
 if [ $? -ne 0 ]; then
     echo "ERROR: Fallo al unir el peer al canal después de $ATTEMPTS intentos."

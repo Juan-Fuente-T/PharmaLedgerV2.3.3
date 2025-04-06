@@ -12,11 +12,11 @@
 export VERBOSE=false
 export COMPOSE_PROJECT_NAME="net"
 # Default image tag para peers y tools
-IMAGETAG="${IMAGE_TAG:-2.5.12}"  # Usa IMAGE_TAG del .env o 2.5.12 como fallback
+IMAGETAG="${IMAGE_TAG:-2.3.3}"  # Usa IMAGE_TAG del .env o 2.5.12 como fallback
 export IMAGE_TAG=$IMAGETAG  # Exportar para docker-compose
 echo "INFO: Using image tag: ${IMAGE_TAG}"
 # Default CA image tag (si usas CA, si no, déjalo comentado)
-CA_IMAGETAG="${CA_IMAGE_TAG:-2.5.12}"  # Usa CA_IMAGE_TAG del .env o 2.5.12 como fallback
+CA_IMAGETAG="${CA_IMAGE_TAG:-2.3.3}"  # Usa CA_IMAGE_TAG del .env o 2.5.12 como fallback
 # export CA_IMAGE_TAG=$CA_IMAGETAG  # Descomenta si usas COMPOSE_FILE_CA
 # Obtain the OS and Architecture string that will be used to select the correct
 # native binaries for your platform, e.g., darwin-amd64 or linux-amd64
@@ -259,20 +259,20 @@ function createConsortium() {
   # Note: For some unknown reason (at least for now) the block file can't be
   # named orderer.genesis.block or the orderer will fail to launch!
 
-  # MODIFICADO: Solo generar si NO existe, aunque idealmente NUNCA debería llegar aquí en el flujo normal con reload.sh
-  if [ ! -f "./system-genesis-block/genesis.block" ]; then
-    set -x
-    # MODIFICADO: Asegurarse que FABRIC_CFG_PATH está seteado (debería venir de reload.sh)
-    configtxgen -profile PharmaLedgerOrdererGenesis -channelID system-channel -outputBlock ./system-genesis-block/genesis.block
-    res=$?
-    set +x
-    if [ $res -ne 0 ]; then
-      echo "Failed to generate orderer genesis block..."
-      exit 1
-    fi
-  else
-      echo "INFO: system-genesis-block/genesis.block exists, skipping generation."
-  fi
+#   # MODIFICADO: Solo generar si NO existe, aunque idealmente NUNCA debería llegar aquí en el flujo normal con reload.sh
+#   if [ ! -f "./system-genesis-block/genesis.block" ]; then
+#     set -x
+#     # MODIFICADO: Asegurarse que FABRIC_CFG_PATH está seteado (debería venir de reload.sh)
+#     configtxgen -profile PharmaLedgerOrdererGenesis -channelID system-channel -outputBlock ./system-genesis-block/genesis.block
+#     res=$?
+#     set +x
+#     if [ $res -ne 0 ]; then
+#       echo "Failed to generate orderer genesis block..."
+#       exit 1
+#     fi
+#   else
+#       echo "INFO: system-genesis-block/genesis.block exists, skipping generation."
+#   fi
 }
 
 # Bring up the peer and orderer nodes using docker compose.

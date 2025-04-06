@@ -1,0 +1,12 @@
+juan@Usuario:~/PROGRAMACION/Hyperledger/pharma/fabric-samples/test-network$
+
+./network.sh down
+./network.sh up -i 2.3.3
+./network.sh createChannel -c mychannel
+¿¿¿¿export FABRIC_VERSION=2.3.3???
+¿¿¿export FABRIC_CA_VERSION=1.5.3???
+¿¿¿./network.sh up???
+¿¿¿./network.sh createChannel -c mychannel???
+./network.sh deployCC -ccn basic -ccp ../asset-transfer-basic/chaincode-javascript/ -ccl javascript
+./network.sh cc query -c mychannel -ccn basic -ccqc '{"Args":["GetAllAssets"]}'
+./network.sh cc invoke -c mychannel -ccn basic -ccic '{"Args":["CreateAsset", "asset13", "purple", "20", "Juan", "250"]}'

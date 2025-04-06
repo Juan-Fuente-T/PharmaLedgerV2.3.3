@@ -41,8 +41,8 @@ Organizations:
                 Type: Signature
                 Rule: "OR('OrdererMSP.admin')"
 
-        OrdererEndpoints:
-            - orderer.example.com:7050
+        # OrdererEndpoints:
+        #     - orderer.example.com:7050
 
     - &Org1
         # DefaultOrg defines the organization which is used in the sampleconfig
@@ -176,7 +176,8 @@ Capabilities:
         # not able to participate in channels at v2.0 capability.
         # Prior to enabling V2.0 channel capabilities, ensure that all
         # orderers and peers on a channel are at v2.0.0 or later.
-        V2_0: true
+        V2_3: &ChannelV2_3
+        Enabled: true
 
     # Orderer capabilities apply only to the orderers, and may be safely
     # used with prior release peers.
@@ -188,7 +189,8 @@ Capabilities:
         # not able to participate in channels at v2.0 orderer capability.
         # Prior to enabling V2.0 orderer capabilities, ensure that all
         # orderers on channel are at v2.0.0 or later.
-        V2_0: true
+        V2_3: &OrdererV2_3 
+        Enabled: true
 
     # Application capabilities apply only to the peer network, and may be safely
     # used with prior release orderers.
@@ -200,7 +202,8 @@ Capabilities:
         # not able to participate in channels at v2.0 application capability.
         # Prior to enabling V2.0 application capabilities, ensure that all
         # peers on channel are at v2.0.0 or later.
-        V2_0: true
+        V2_3: &ApplicationV2_3
+        Enabled: true
 
 ################################################################################
 #
@@ -341,20 +344,36 @@ Channel: &ChannelDefaults
 ################################################################################
 Profiles:
 
-    # PharmaLedgerOrdererGenesis:
-    #     <<: *ChannelDefaults
-    #     Orderer:
-    #         <<: *OrdererDefaults
-    #         Organizations:
-    #             - *OrdererOrg
-    #         Capabilities:
-    #             <<: *OrdererCapabilities
-    #     Consortiums:
-    #         PharmaLedgerConsortium:
+    PharmaLedgerOrdererGenesis:
+        <<: *ChannelDefaults
+        Orderer:
+            <<: *OrdererDefaults
+            Organizations:
+                - *OrdererOrg
+            Capabilities:
+                <<: *OrdererCapabilities
+                V2_3: true
+        Consortiums:
+            PharmaLedgerConsortium:
+                Organizations:
+                    - *Org1
+                    - *Org2
+                    - *Org3
+
+    #     PharmaLedgerOrdererGenesis:
+    #         <<: *ChannelDefaults
+    #         Orderer:
+    #             <<: *OrdererDefaults
     #             Organizations:
-    #                 - *Org1
-    #                 - *Org2
-    #                 - *Org3
+    #                 - *OrdererOrg
+    #             Capabilities:
+    #                 <<: *OrdererCapabilities
+    #         Consortiums:
+    #             SampleConsortium:
+    #                 Organizations:
+    #                    - *Org1
+    #                    - *Org2
+    #                    - *Org3
 
     # PharmaLedgerChannel:
     #         <<: *ChannelDefaults
@@ -371,16 +390,207 @@ Profiles:
         Consortium: PharmaLedgerConsortium
         <<: *ChannelDefaults
         Orderer:                           
-            <<: *OrdererDefaults          
+            <<: *OrdererDefaults  
+            OrdererType: etcdraft         
             Organizations:               
-                - *OrdererOrg           
-            Capabilities:               
-                <<: *OrdererCapabilities    
+                - *OrdererOrg 
+            Addresses: 
+            - orderer.example.com:7050  
+            Capabilities: 
+                <<: *ChannelCapabilities
+                V2_3: true
         Application:
             <<: *ApplicationDefaults
             Organizations:
                 - *Org1
                 - *Org2
                 - *Org3
-            Capabilities:
-                <<: *ApplicationCapabilities
+        Capabilities:
+            <<: *ChannelCapabilities
+            V2_3: true
+
+# Organizations:
+#     - &OrdererOrg
+#         Name: OrdererOrg
+#         ID: OrdererMSP
+#         MSPDir: ../organizations/ordererOrganizations/example.com/msp
+#         Policies:
+#             Readers:
+#                 Type: Signature
+#                 Rule: "OR('OrdererMSP.member')"
+#             Writers:
+#                 Type: Signature
+#                 Rule: "OR('OrdererMSP.member')"
+#             Admins:
+#                 Type: Signature
+#                 Rule: "OR('OrdererMSP.admin')"
+
+#     - &Org1
+#         Name: Org1MSP
+#         ID: Org1MSP
+#         MSPDir: ../organizations/peerOrganizations/org1.example.com/msp
+#         Policies:
+#             Readers:
+#                 Type: Signature
+#                 Rule: "OR('Org1MSP.admin', 'Org1MSP.peer', 'Org1MSP.client')"
+#             Writers:
+#                 Type: Signature
+#                 Rule: "OR('Org1MSP.admin', 'Org1MSP.client')"
+#             Admins:
+#                 Type: Signature
+#                 Rule: "OR('Org1MSP.admin')"
+#             Endorsement:
+#                 Type: Signature
+#                 Rule: "OR('Org1MSP.peer')"
+#         AnchorPeers:
+#             - Host: peer0.org1.example.com
+#               Port: 7051
+#     - &Org2
+#         Name: Org2MSP
+#         ID: Org2MSP
+#         MSPDir: ../organizations/peerOrganizations/org2.example.com/msp
+#         Policies:
+#             Readers:
+#                 Type: Signature
+#                 Rule: "OR('Org2MSP.admin', 'Org2MSP.peer', 'Org2MSP.client')"
+#             Writers:
+#                 Type: Signature
+#                 Rule: "OR('Org2MSP.admin', 'Org2MSP.client')"
+#             Admins:
+#                 Type: Signature
+#                 Rule: "OR('Org2MSP.admin')"
+#             Endorsement:
+#                 Type: Signature
+#                 Rule: "OR('Org2MSP.peer')"
+#         AnchorPeers:
+#             - Host: peer0.org2.example.com
+#               Port: 9051
+
+#     - &Org3
+#         Name: Org3MSP
+#         ID: Org3MSP
+#         MSPDir: ../organizations/peerOrganizations/org3.example.com/msp
+#         Policies:
+#             Readers:
+#                 Type: Signature
+#                 Rule: "OR('Org3MSP.admin', 'Org3MSP.peer', 'Org3MSP.client')"
+#             Writers:
+#                 Type: Signature
+#                 Rule: "OR('Org3MSP.admin', 'Org3MSP.client')"
+#             Admins:
+#                 Type: Signature
+#                 Rule: "OR('Org3MSP.admin')"
+#             Endorsement:
+#                 Type: Signature
+#                 Rule: "OR('Org3MSP.peer')"
+#         AnchorPeers:
+#             - Host: peer0.org3.example.com
+#               Port: 11051
+
+# Capabilities:
+#     Channel: &ChannelCapabilities
+#         V2_3: &ChannelV2_3
+#         Enabled: true
+#     Orderer: &OrdererCapabilities
+#         V2_3: &OrdererV2_3
+#         Enabled: true
+#     Application: &ApplicationCapabilities
+#         V2_3: &ApplicationV2_3
+#         Enabled: true
+
+# Application: &ApplicationDefaults
+#     Organizations:
+#     Policies:
+#         Readers:
+#             Type: ImplicitMeta
+#             Rule: "ANY Readers"
+#         Writers:
+#             Type: ImplicitMeta
+#             Rule: "ANY Writers"
+#         Admins:
+#             Type: ImplicitMeta
+#             Rule: "MAJORITY Admins"
+#         LifecycleEndorsement:
+#             Type: ImplicitMeta
+#             Rule: "MAJORITY Endorsement"
+#         Endorsement:
+#             Type: ImplicitMeta
+#             Rule: "MAJORITY Endorsement"
+#     Capabilities:
+#         <<: *ApplicationCapabilities
+
+# Orderer: &OrdererDefaults
+#     OrdererType: etcdraft
+#     EtcdRaft:
+#         Consenters:
+#             - Host: orderer.example.com
+#               Port: 7050
+#               ClientTLSCert: ../organizations/ordererOrganizations/example.com/orderers/orderer.example.com/tls/server.crt
+#               ServerTLSCert: ../organizations/ordererOrganizations/example.com/orderers/orderer.example.com/tls/server.crt
+#     BatchTimeout: 2s
+#     BatchSize:
+#         MaxMessageCount: 10
+#         AbsoluteMaxBytes: 99 MB
+#         PreferredMaxBytes: 512 KB
+#     Organizations:
+#     Policies:
+#         Readers:
+#             Type: ImplicitMeta
+#             Rule: "ANY Readers"
+#         Writers:
+#             Type: ImplicitMeta
+#             Rule: "ANY Writers"
+#         Admins:
+#             Type: ImplicitMeta
+#             Rule: "MAJORITY Admins"
+#         BlockValidation:
+#             Type: ImplicitMeta
+#             Rule: "ANY Writers"
+
+# Channel: &ChannelDefaults
+#     Policies:
+#         Readers:
+#             Type: ImplicitMeta
+#             Rule: "ANY Readers"
+#         Writers:
+#             Type: ImplicitMeta
+#             Rule: "ANY Writers"
+#         Admins:
+#             Type: ImplicitMeta
+#             Rule: "MAJORITY Admins"
+#     Capabilities:
+#         <<: *ChannelCapabilities
+
+# Profiles:
+#     PharmaLedgerChannel:
+#         Consortium: SampleConsortium # Vamos a usar un consorcio simple
+#         <<: *ChannelDefaults
+#         Orderer:
+#             <<: *OrdererDefaults
+#             Organizations:
+#                 - *OrdererOrg
+#             Capabilities:
+#                 <<: *OrdererCapabilities
+#             Addresses:
+#                 - orderer.example.com:7050
+#         Application:
+#             <<: *ApplicationDefaults
+#             Organizations:
+#                 - *Org1
+#             Capabilities:
+#                 <<: *ApplicationCapabilities
+
+#     PharmaLedgerOrdererGenesis:
+#         <<: *ChannelDefaults
+#         Orderer:
+#             <<: *OrdererDefaults
+#             Organizations:
+#                 - *OrdererOrg
+#             Capabilities:
+#                 <<: *OrdererCapabilities
+#         Consortiums:
+#             SampleConsortium:
+#                 Organizations:
+#                    - *Org1
+#                    - *Org2
+#                    - *Org3

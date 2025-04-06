@@ -21,7 +21,7 @@ General:
     # TLS: TLS settings for the GRPC server.
     TLS:
         # Require server-side TLS
-        Enabled: false
+        Enabled: true
         # PrivateKey governs the file location of the private key of the TLS certificate.
         PrivateKey: tls/server.key
         # Certificate governs the file location of the server TLS certificate.
@@ -366,7 +366,7 @@ Metrics:
 ################################################################################
 Admin:
     # host and port for the admin server
-    ListenAddress: 127.0.0.1:9443
+    ListenAddress: 0.0.0.0:7053
 
     # TLS configuration for the admin endpoint
     TLS:
@@ -401,7 +401,7 @@ Admin:
 ################################################################################
 ChannelParticipation:
     # Channel participation API is enabled.
-    Enabled: false
+    Enabled: true
 
     # The maximum size of the request body when joining a channel.
     MaxRequestBodySize: 1 MB

@@ -1,0 +1,6 @@
+estando en ~/PROGRAMACION/Hyperledger/pharma/pharma-ledger-network$ 
+
+export FABRIC_CFG_PATH=${PWD}/configtx
+configtxgen -profile PharmaLedgerOrdererGenesis -outputBlock ./system-genesis-block/genesis.block -channelID system-channel
+configtxgen -profile PharmaLedgerChannel -outputBlock ./channel-artifacts/plnchannel.block -channelID plnchannel
+
