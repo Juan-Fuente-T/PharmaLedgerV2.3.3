@@ -68,7 +68,7 @@ function checkPrereqs() {
   ## Check if your have cloned the peer binaries and configuration files.
   peer version > /dev/null 2>&1
 
-  if [[ $? -ne 0 || ! -d "../config" ]]; then
+  if [[ $? -ne 0 || ! -d "./config" ]]; then
     echo "ERROR! Peer binary and configuration files not found.."
     echo
     echo "Follow the instructions in the Fabric docs to install the Fabric Binaries:"
@@ -314,10 +314,10 @@ CC_SRC_LANGUAGE=javascript
 # Chaincode version
 VERSION=1
 # default image tag
-IMAGETAG="latest"
+IMAGETAG="2.3.3"
 # default ca image tag
 # CA_IMAGETAG="1.4.6"
-CA_IMAGETAG="latest"
+CA_IMAGETAG="2.3.3"
 # default database
 DATABASE="leveldb"
 

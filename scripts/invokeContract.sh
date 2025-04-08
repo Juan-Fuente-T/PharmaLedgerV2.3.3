@@ -11,7 +11,7 @@ DELAY=3
 MAX_RETRY=5
 VERBOSE=true
 CHINCODE_NAME="pharmaLedgerContract"
-FABRIC_CFG_PATH=$PWD/../config/
+FABRIC_CFG_PATH=$PWD/./config/
 
 manufacturer=""
 equipmentNumber=""
