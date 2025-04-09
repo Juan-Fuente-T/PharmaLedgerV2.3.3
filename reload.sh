@@ -74,20 +74,62 @@ cryptogen generate --config=./organizations/cryptogen/crypto-config-org2.yaml --
 cryptogen generate --config=./organizations/cryptogen/crypto-config-org3.yaml --output=organizations
 cryptogen generate --config=./organizations/cryptogen/crypto-config-orderer.yaml --output=organizations
 
+# --- Crear Wallet para Explorer ---
+echo "****** Creando/Regenerando wallet para Explorer... ******"
+WALLET_DIR="./wallet" # Directorio donde Explorer buscará la identidad
+ADMIN_CERT_SRC="${PWD}/organizations/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/signcerts/Admin@org1.example.com-cert.pem"
+# Encuentra el archivo _sk dinámicamente por si cambia el hash
+ADMIN_KEY_SRC_DIR="${PWD}/organizations/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/keystore/"
+ADMIN_KEY_SRC=$(find "$ADMIN_KEY_SRC_DIR" -type f -name '*_sk')
+
+# Verifica que los archivos fuente existen (importante, después de cryptogen)
+if [ ! -f "$ADMIN_CERT_SRC" ]; then
+    echo "ERROR: Certificado fuente de Admin Org1 no encontrado en $ADMIN_CERT_SRC"
+    exit 1
+fi
+if [ -z "$ADMIN_KEY_SRC" ]; then
+    echo "ERROR: Clave privada fuente (_sk) de Admin Org1 no encontrada en $ADMIN_KEY_SRC_DIR"
+    exit 1
+fi
+# Asegurarse de que solo hay una clave _sk
+if [ $(echo "$ADMIN_KEY_SRC" | wc -l) -ne 1 ]; then
+     echo "ERROR: Se encontró más de una clave privada (_sk) en $ADMIN_KEY_SRC_DIR. Limpia el directorio."
+     exit 1
+fi
+
+# Asegura que el directorio wallet existe (lo crea si rm lo borró)
+mkdir -p "$WALLET_DIR"
+
+# Captura los PEM formateados correctamente para JSON usando jq
+CERT_PEM_JSON=$(jq -Rs '.' "$ADMIN_CERT_SRC")
+KEY_PEM_JSON=$(jq -Rs '.' "$ADMIN_KEY_SRC")
+
+# Crea el archivo admin.id usando las variables (SIN COPIAR/PEGAR MANUALMENTE)
+cat << EOF > "${WALLET_DIR}/admin.id"
+{
+  "credentials": {
+    "certificate": ${CERT_PEM_JSON},
+    "privateKey": ${KEY_PEM_JSON}
+  },
+  "mspId": "Org1MSP",
+  "type": "X.509",
+  "version": 1
+}
+EOF
+
+# Verifica la creación del archivo
+if [ ! -f "${WALLET_DIR}/admin.id" ]; then
+    echo "ERROR: Falló la creación de ${WALLET_DIR}/admin.id"
+    exit 1
+else
+    echo "****** Wallet 'admin.id' para Explorer creada/regenerada exitosamente. ******"
+fi
+# --- Fin Crear Wallet para Explorer ---
+
+
 echo "****** Generando CCPs ******"
 chmod +x ./organizations/ccp-generate.sh
 ./organizations/ccp-generate.sh
-
-# Preparación opcional para Hyperledger Explorer (descomentar si se usa)
-echo "****** Configurando Hyperledger Explorer wallet... ******"
-ADMIN_KEY_FILE=$(find ./organizations/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/keystore/ -name '*_sk' -type f -print -quit)
-if [ -z "$ADMIN_KEY_FILE" ]; then
-  echo "ERROR: No se encontró el archivo de clave privada para Admin@org1.example.com"
-  exit 1
-fi
-mkdir -p ./wallet/admin
-cp "$ADMIN_KEY_FILE" ./wallet/admin/private_key
-cp ./organizations/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/signcerts/Admin@org1.example.com-cert.pem ./wallet/admin/certificate
 
 # ---- Generación de Artefactos de Canal ----
 echo "****** Generando bloque génesis del canal del sistema... ******"
@@ -97,13 +139,69 @@ ls -la ./system-genesis-block
 
 # ---- Levantando la red Fabric (contenedores) ----
 echo "****** Levantando la red Fabric (contenedores)... ******"
+# --- Bloque de Verificación del Genesis Block en Host ---
+GENESIS_BLOCK_PATH="./system-genesis-block/genesis.block"
+echo "****** Verificando ruta en host ANTES de montar: $GENESIS_BLOCK_PATH ******"
+
+if [ -f "$GENESIS_BLOCK_PATH" ]; then
+    # Si existe Y ES un archivo regular
+    echo "INFO: La ruta existe y ES un ARCHIVO en el host."
+    ls -la "$GENESIS_BLOCK_PATH" # Muestra detalles del archivo
+elif [ -d "$GENESIS_BLOCK_PATH" ]; then
+    # Si existe PERO ES un directorio
+    echo "ERROR FATAL: ¡La ruta existe pero ES UN DIRECTORIO en el host!"
+    echo "Contenido del directorio:"
+    ls -la ./system-genesis-block/
+    exit 1 # Detiene el script ANTES de intentar montar un directorio
+else
+    # Si no existe
+    echo "ERROR FATAL: ¡La ruta $GENESIS_BLOCK_PATH NO EXISTE en el host!"
+    echo "Verifica que configtxgen se ejecutó correctamente antes."
+    echo "Contenido de ./system-genesis-block/ por si acaso:"
+    ls -la ./system-genesis-block/
+    exit 1 # Detiene el script
+fi
+echo "****** Verificación en host OK (es un archivo), intentando levantar red... ******"
+# --- Fin Bloque de Verificación -
+
+echo "****** Levantando red... ******"
 ./net-pln.sh up
-echo "Esperando a que los contenedores se estabilicen (15s)..."
-sleep 15
+echo "Esperando a que los contenedores se estabilicen (10s)..."
+sleep 10
+
+# echo "****** Copiando genesis.block DIRECTAMENTE al contenedor Orderer via 'docker cp'... ******"
+# docker exec orderer.example.com mkdir -p /var/hyperledger/orderer/genesis
+# docker cp ./system-genesis-block/genesis.block orderer.example.com:/var/hyperledger/orderer/genesis/genesis.block
+
+# # Verifica si la copia falló (opcional pero recomendado)
+# if [ $? -ne 0 ]; then
+#   echo "ERROR: Falló 'docker cp' al copiar el genesis.block al contenedor del Orderer."
+#   # exit 1
+# else
+#   echo "INFO: 'docker cp' completado (código de salida $?)." # Añadido para confirmación
+# fi
+
+# # --- NUEVO: VERIFICAR ARCHIVO ANTES DE REINICIAR ---
+# echo "****** Verificando archivo DESPUÉS de cp, ANTES de restart: ******"
+# docker exec orderer.example.com ls -la /var/hyperledger/orderer/genesis/genesis.block || echo "ERROR: El archivo NO EXISTE según 'docker exec ls' ANTES del restart."
+
+# echo "****** Reiniciando el Orderer para que lea el bloque copiado... ******"
+# docker restart orderer.example.com
+
+# echo "****** Esperando después de restart (8s)... ******"
+# sleep 8
+
+# # --- NUEVO: VERIFICAR ARCHIVO DESPUÉS DE REINICIAR ---
+# echo "****** Verificando archivo DESPUÉS de restart: ******"
+# docker exec orderer.example.com ls -la /var/hyperledger/orderer/genesis/genesis.block || echo "ERROR: El archivo NO EXISTE según 'docker exec ls' DESPUÉS del restart."
+
+# echo "****** Verificando logs del Orderer DESPUÉS de 'docker cp' y 'restart'... ******"
+# docker logs orderer.example.com | head -n 70
+
 
 # ---- Unir Orderer al Canal del sistema----
-echo "****** Haciendo que Orderer se una al canal ${CHANNEL_NAME}... ******"
-osnadmin channel join --channelID system-channel --config-block ./system-genesis-block/genesis.block -o localhost:7053 --ca-file "${ORDERER_CA}" --client-cert "${ORDERER_ADMIN_TLS_SIGN_CERT}" --client-key "${ORDERER_ADMIN_TLS_PRIVATE_KEY}"
+# echo "****** Haciendo que Orderer se una al canal ${CHANNEL_NAME}... ******"
+# osnadmin channel join --channelID system-channel --config-block ./system-genesis-block/genesis.block -o localhost:7053 --ca-file "${ORDERER_CA}" --client-cert "${ORDERER_ADMIN_TLS_SIGN_CERT}" --client-key "${ORDERER_ADMIN_TLS_PRIVATE_KEY}"
 # echo "****** Variables para el plnChannel ${ORDERER_CA}...${ORDERER_ADMIN_TLS_SIGN_CERT}...${ORDERER_ADMIN_TLS_PRIVATE_KEY} ******"
 # osnadmin channel join --channelID plnchannel --config-block ./channel-artifacts/plnchannel.block -o localhost:7053 --ca-file "${ORDERER_CA}"
 # osnadmin channel join --channelID ${CHANNEL_NAME} --config-block ./channel-artifacts/${CHANNEL_NAME}.block -o localhost:7053 --ca-file "${ORDERER_CA}"
@@ -119,17 +217,17 @@ sleep 5
 echo "****** Generando bloque génesis del canal ${CHANNEL_NAME}... ******"
 configtxgen -profile PharmaLedgerChannel -outputBlock ./channel-artifacts/plnchannel.block -channelID plnchannel
 
-# ---- Unir Orderer al Canal de Aplicación ----
-echo "****** Haciendo que Orderer se una al canal ${CHANNEL_NAME}... ******"
-osnadmin channel join --channelID plnchannel --config-block ./channel-artifacts/plnchannel.block -o localhost:7053 --ca-file "${ORDERER_CA}" --client-cert "${ORDERER_ADMIN_TLS_SIGN_CERT}" --client-key "${ORDERER_ADMIN_TLS_PRIVATE_KEY}"
-if [ $? -ne 0 ]; then
-  echo "ERROR: Fallo al unir el orderer al canal ${CHANNEL_NAME}"
-  exit 1
-fi
-echo "****** Orderer unido al canal ${CHANNEL_NAME} ******"
-echo "****** Contenido de channel-artifacts: ******"
-ls -la ./channel-artifacts
-sleep 5
+# # ---- Unir Orderer al Canal de Aplicación ----
+# echo "****** Haciendo que Orderer se una al canal ${CHANNEL_NAME}... ******"
+# osnadmin channel join --channelID plnchannel --config-block ./channel-artifacts/plnchannel.block -o localhost:7053 --ca-file "${ORDERER_CA}" --client-cert "${ORDERER_ADMIN_TLS_SIGN_CERT}" --client-key "${ORDERER_ADMIN_TLS_PRIVATE_KEY}"
+# if [ $? -ne 0 ]; then
+#   echo "ERROR: Fallo al unir el orderer al canal ${CHANNEL_NAME}"
+#   exit 1
+# fi
+# echo "****** Orderer unido al canal ${CHANNEL_NAME} ******"
+# echo "****** Contenido de channel-artifacts: ******"
+# ls -la ./channel-artifacts
+# sleep 5
 
 # ---- Unir Peers al Canal ----
 echo "****** Uniendo peer0.org1 al canal ${CHANNEL_NAME}... ******"

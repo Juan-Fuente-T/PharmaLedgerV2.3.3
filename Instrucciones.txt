@@ -5,7 +5,9 @@ Ejecutar desde terminal:
 - ./loadFabric.sh --para descargar y crean las imagenes docker(ejecutar fuera del proyecto)
 - ./net-pln.sh up --ejecuta todos los comandos necesarios para levantar el servicio,
 creando los contenedores (para ambos casos en necesario Docker en marcha)
+
 Para dar permisos si es necesario. chmod +x net-pln.sh
+
 Para monitorizar los logs ejecutamos: ./net-pln.sh monitor-up
 - ./net-pln.sh createChannel  crea el canal
 - ./net-pln.sh deploySmartContract.sh  despliega el smart contract/chaincode
@@ -87,3 +89,14 @@ export FABRIC_CFG_PATH=${PWD}/configtx
 ls $FABRIC_CFG_PATH/core.yaml
 echo $FABRIC_CFG_PATH
 ./net-pln.sh invoke query 2000.001
+
+jq -Rs '.' ruta/al/certificado/tlsca.pem
+
+Editar variable entorno (importante)
+nano ~/.bashrc
+control o para guardar
+enter para sobreescribir el archivo
+control x para salir
+
+docker network rm net_pln
+docker system prune -a --volumes

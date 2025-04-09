@@ -176,7 +176,7 @@ Capabilities:
         # not able to participate in channels at v2.0 capability.
         # Prior to enabling V2.0 channel capabilities, ensure that all
         # orderers and peers on a channel are at v2.0.0 or later.
-        V2_3: &ChannelV2_3
+        V2_0: &ChannelV2_0
         Enabled: true
 
     # Orderer capabilities apply only to the orderers, and may be safely
@@ -189,7 +189,7 @@ Capabilities:
         # not able to participate in channels at v2.0 orderer capability.
         # Prior to enabling V2.0 orderer capabilities, ensure that all
         # orderers on channel are at v2.0.0 or later.
-        V2_3: &OrdererV2_3 
+        V2_0: &OrdererV2_0 
         Enabled: true
 
     # Application capabilities apply only to the peer network, and may be safely
@@ -202,7 +202,7 @@ Capabilities:
         # not able to participate in channels at v2.0 application capability.
         # Prior to enabling V2.0 application capabilities, ensure that all
         # peers on channel are at v2.0.0 or later.
-        V2_3: &ApplicationV2_3
+        V2_0: &ApplicationV2_0
         Enabled: true
 
 ################################################################################
@@ -351,40 +351,16 @@ Profiles:
             Organizations:
                 - *OrdererOrg
             Capabilities:
-                <<: *OrdererCapabilities
-                V2_3: true
+                # <<: *OrdererCapabilities
+                V2_0: true
+            Addresses:
+                - orderer.example.com:7050
         Consortiums:
             PharmaLedgerConsortium:
                 Organizations:
                     - *Org1
                     - *Org2
                     - *Org3
-
-    #     PharmaLedgerOrdererGenesis:
-    #         <<: *ChannelDefaults
-    #         Orderer:
-    #             <<: *OrdererDefaults
-    #             Organizations:
-    #                 - *OrdererOrg
-    #             Capabilities:
-    #                 <<: *OrdererCapabilities
-    #         Consortiums:
-    #             SampleConsortium:
-    #                 Organizations:
-    #                    - *Org1
-    #                    - *Org2
-    #                    - *Org3
-
-    # PharmaLedgerChannel:
-    #         <<: *ChannelDefaults
-    #         Consortium: PharmaLedgerConsortium 
-
-    #         Application:
-    #             <<: *ApplicationDefaults
-    #             Organizations:
-    #                 - <<: *Org1
-    #                 - <<: *Org2
-    #                 - <<: *Org3
 
     PharmaLedgerChannel:
         Consortium: PharmaLedgerConsortium
@@ -395,10 +371,10 @@ Profiles:
             Organizations:               
                 - *OrdererOrg 
             Addresses: 
-            - orderer.example.com:7050  
+                [orderer.example.com:7050]
             Capabilities: 
                 <<: *ChannelCapabilities
-                V2_3: true
+                V2_0: true
         Application:
             <<: *ApplicationDefaults
             Organizations:
@@ -407,7 +383,7 @@ Profiles:
                 - *Org3
         Capabilities:
             <<: *ChannelCapabilities
-            V2_3: true
+            V2_0: true
 
 # Organizations:
 #     - &OrdererOrg

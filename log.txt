@@ -1,0 +1,1 @@
+[31m2025-04-09 15:00:39.061 CEST [main] InitCmd -> ERRO 001[0m Fatal error when initializing core config : FABRIC_CFG_PATH /home/juan/PROGRAMACION/Hyperledger/pharma/pharma-ledger-network/../config/ does not exist

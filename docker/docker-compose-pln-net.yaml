@@ -7,14 +7,14 @@ version: '2'
 
 volumes:
   orderer.example.com:
-  peer0.org1.example.com:
-  peer0.org2.example.com:
-  peer0.org3.example.com: # explorerdb_data:
-
+  # peer0.org1.example.com:
+  # peer0.org2.example.com:
+  # peer0.org3.example.com:
+  # explorerdb_data:
   # explorer-wallet:
-  manufacturer-app:
-  wholesaler-app:
-  pharmacy-app:
+  # manufacturer-app:
+  # wholesaler-app:
+  # pharmacy-app:
 
 
 networks:
@@ -49,9 +49,9 @@ services:
       # Necesitamos CAs de cliente si queremos autenticación mutua (más seguro)
       - ORDERER_ADMIN_TLS_CLIENTAUTHREQUIRED=true # Requerir que el cliente (osnadmin) se autentique
       - ORDERER_ADMIN_TLS_CLIENTROOTCAS=[/var/hyperledger/orderer/tls/ca.crt] # CA que firma los certs de cliente válidos (el Admin del Orderer)
-
       - ORDERER_GENERAL_BOOTSTRAPMETHOD=file
-      - ORDERER_GENERAL_BOOTSTRAPFILE=/etc/hyperledger/fabric/genesis.block
+      # - ORDERER_GENERAL_BOOTSTRAPFILE=/var/hyperledger/orderer/genesis/genesis.block      
+      - ORDERER_GENERAL_BOOTSTRAPFILE=/etc/hyperledger/fabric/genesis.block # <-- RUTA ORIGINAL
       - ORDERER_CHANNELPARTICIPATION_ENABLED=true
       - ORDERER_KAFKA_TOPIC_REPLICATIONFACTOR=1
       - ORDERER_KAFKA_VERBOSE=true
@@ -62,317 +62,316 @@ services:
     command: orderer
     volumes:
       - /home/juan/PROGRAMACION/Hyperledger/pharma/pharma-ledger-network/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp:/var/hyperledger/orderer/msp
-      - /home/juan/PROGRAMACION/Hyperledger/pharma/pharma-ledger-network/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/tls/:/var/hyperledger/orderer/tls
+      - /home/juan/PROGRAMACION/Hyperledger/pharma/pharma-ledger-network/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/tls:/var/hyperledger/orderer/tls
       - orderer.example.com:/var/hyperledger/production/orderer
-      - ./system-genesis-block/genesis.block:/etc/hyperledger/fabric/genesis.block
-      - orderer.example.com:/var/log/hyperledger/orderer
+      # - genesis_volume:/var/hyperledger/orderer/genesis
+      # - orderer.example.com:/var/hyperledger/production/orderer
+      - /home/juan/PROGRAMACION/Hyperledger/pharma/pharma-ledger-network/system-genesis-block/genesis.block:/etc/hyperledger/fabric/genesis.block 
     ports:
       - 7050:7050
       - 7053:7053
     networks:
       - pln
 
-  peer0.org1.example.com:
-    container_name: peer0.org1.example.com
-    image: hyperledger/fabric-peer:$IMAGE_TAG
-    environment:
-      #Generic peer variables
-      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
-      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=${COMPOSE_PROJECT_NAME}_pln
-      - FABRIC_LOGGING_SPEC=DEBUG
-      #- FABRIC_LOGGING_SPEC=DEBUG
-      - CORE_PEER_TLS_ENABLED=true
-      - CORE_PEER_GOSSIP_USELEADERELECTION=true
-      - CORE_PEER_GOSSIP_ORGLEADER=false
-      - CORE_PEER_PROFILE_ENABLED=true
-      - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/fabric/tls/server.crt
-      - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/tls/server.key
-      - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/tls/ca.org1.example.com-cert.pem /etc/hyperledger/fabric/tls/ca.org2.example.com-cert.pem /etc/hyperledger/fabric/tls/ca.org3.example.com-cert.pem
-      - CORE_PEER_ID=peer0.org1.example.com
-      - CORE_PEER_ADDRESS=peer0.org1.example.com:7051
-      - CORE_PEER_LISTENADDRESS=0.0.0.0:7051
-      - CORE_PEER_CHAINCODEADDRESS=peer0.org1.example.com:7052
-      - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:7052
-      # - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.org1.example.com:7051
-      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.org2.example.com:9051 peer0.org3.example.com:11051
-      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.org1.example.com:7051
-      - CORE_PEER_LOCALMSPID=Org1MSP
-      # - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/fabric/admin_msp
-      - CORE_CHAINCODE_STARTUP_TIMEOUT=5s # O un valor mayor
-      - CORE_CHAINCODE_EXECUTETIMEOUT=20s
-      - FABRIC_CFG_PATH=/etc/hyperledger/fabric
-    # command: peer chaincode start --peer.address peer0.org1.example.com:7052 --chaincode-id pharmaLedgerContract_1 --chaincode-address 0.0.0.0:7052
+  # peer0.org1.example.com:
+  #   container_name: peer0.org1.example.com
+  #   image: hyperledger/fabric-peer:$IMAGE_TAG
+  #   environment:
+  #     #Generic peer variables
+  #     - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+  #     - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=${COMPOSE_PROJECT_NAME}_pln
+  #     - FABRIC_LOGGING_SPEC=DEBUG
+  #     #- FABRIC_LOGGING_SPEC=DEBUG
+  #     - CORE_PEER_TLS_ENABLED=true
+  #     - CORE_PEER_GOSSIP_USELEADERELECTION=true
+  #     - CORE_PEER_GOSSIP_ORGLEADER=false
+  #     - CORE_PEER_PROFILE_ENABLED=true
+  #     - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/fabric/tls/server.crt
+  #     - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/tls/server.key
+  #     - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/tls/ca.crt 
+  #     - CORE_PEER_ADDRESS=peer0.org1.example.com:7051
+  #     - CORE_PEER_LISTENADDRESS=0.0.0.0:7051
+  #     - CORE_PEER_CHAINCODEADDRESS=peer0.org1.example.com:7052
+  #     - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:7052
+  #     # - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.org1.example.com:7051
+  #     - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.org2.example.com:9051 peer0.org3.example.com:11051
+  #     - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.org1.example.com:7051
+  #     - CORE_PEER_LOCALMSPID=Org1MSP
+  #     # - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/fabric/admin_msp
+  #     - CORE_CHAINCODE_STARTUP_TIMEOUT=5s # O un valor mayor
+  #     - CORE_CHAINCODE_EXECUTETIMEOUT=20s
+  #     - FABRIC_CFG_PATH=/etc/hyperledger/fabric
+  #   # command: peer chaincode start --peer.address peer0.org1.example.com:7052 --chaincode-id pharmaLedgerContract_1 --chaincode-address 0.0.0.0:7052
   
-    volumes:
-      - /var/run/:/host/var/run/
-      - /home/juan/PROGRAMACION/Hyperledger/pharma/pharma-ledger-network/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/msp:/etc/hyperledger/fabric/msp
-      - /home/juan/PROGRAMACION/Hyperledger/pharma/pharma-ledger-network/organizations/peerOrganizations/org1.example.com/tls:/etc/hyperledger/fabric/tls/
-      #CUIDADO. Esta configuarcion cruzada es necesaria para que el peer pueda acceder a los otros peers, DURANTE EL DESARROLLO UNICAMENTE
-      - peer0.org1.example.com:/var/hyperledger/production
-      - /home/juan/PROGRAMACION/Hyperledger/pharma/pharma-ledger-network/config:/etc/hyperledger/fabric
-    working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
-    # command: peer node start
-    ports:
-      - 7051:7051
-    networks:
-      - pln
+  #   volumes:
+  #     - /var/run/:/host/var/run/
+  #     - /home/juan/PROGRAMACION/Hyperledger/pharma/pharma-ledger-network/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/msp:/etc/hyperledger/fabric/msp
+  #     - /home/juan/PROGRAMACION/Hyperledger/pharma/pharma-ledger-network/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls:/etc/hyperledger/fabric/tls
+  #     #CUIDADO. Esta configuarcion cruzada es necesaria para que el peer pueda acceder a los otros peers, DURANTE EL DESARROLLO UNICAMENTE
+  #     - orderer.example.com:/var/hyperledger/production
+  #     # - genesis_volume:/var/hyperledger/orderer/genesis
+  #     # - orderer.example.com:/var/hyperledger/production/orderer
+  #     # - /home/juan/PROGRAMACION/Hyperledger/pharma/pharma-ledger-network/system-genesis-block/genesis.block:/etc/hyperledger/fabric/genesis.block 
+  #   working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
+  #   # command: peer node start
+  #   ports:
+  #     - 7051:7051
+  #   networks:
+  #     - pln
 
+  # peer0.org2.example.com:
+  #   container_name: peer0.org2.example.com
+  #   image: hyperledger/fabric-peer:$IMAGE_TAG
+  #   environment:
+  #     #Generic peer variables
+  #     - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+  #     - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=${COMPOSE_PROJECT_NAME}_pln
+  #     - FABRIC_LOGGING_SPEC=INFO
+  #     #- FABRIC_LOGGING_SPEC=DEBUG
+  #     - CORE_PEER_TLS_ENABLED=true
+  #     - CORE_PEER_GOSSIP_USELEADERELECTION=true
+  #     - CORE_PEER_GOSSIP_ORGLEADER=false
+  #     - CORE_PEER_PROFILE_ENABLED=true
+  #     - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/fabric/tls/server.crt
+  #     - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/tls/server.key
+  #     - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/tls/ca.crt
+  #     # Peer specific variabes
+  #     - CORE_PEER_ID=peer0.org2.example.com
+  #     - CORE_PEER_ADDRESS=peer0.org2.example.com:9051
+  #     - CORE_PEER_LISTENADDRESS=0.0.0.0:9051
+  #     - CORE_PEER_CHAINCODEADDRESS=peer0.org2.example.com:9052
+  #     - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:9052
+  #     - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.org2.example.com:9051
+  #     # - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.org2.example.com:9051
+  #     - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.org1.example.com:7051 peer0.org3.example.com:11051
+  #     - CORE_PEER_LOCALMSPID=Org2MSP
+  #     - CORE_CHAINCODE_STARTUP_TIMEOUT=5s # O un valor mayor
+  #     - CORE_CHAINCODE_EXECUTETIMEOUT=20s
+  #     - FABRIC_CFG_PATH=/etc/hyperledger/fabric
 
+  #   volumes:
+  #     - /var/run/:/host/var/run/
+  #     - /home/juan/PROGRAMACION/Hyperledger/pharma/pharma-ledger-network/organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/msp:/etc/hyperledger/fabric/msp
+  #     #CUIDADO. Esta configuarcion cruzada es necesaria para que el peer pueda acceder a los otros peers, DURANTE EL DESARROLLO UNICAMENTE
+  #     - /home/juan/PROGRAMACION/Hyperledger/pharma/pharma-ledger-network/organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls:/etc/hyperledger/fabric/tls/
+  #     - peer0.org2.example.com:/var/hyperledger/production
+  #     - /home/juan/PROGRAMACION/Hyperledger/pharma/pharma-ledger-network/system-genesis-block/genesis.block:/etc/hyperledger/fabric/genesis.block     
+  #   working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
+  #   command: peer node start
+  #   ports:
+  #     - 9051:9051
+  #   networks:
+  #     - pln
 
-  peer0.org2.example.com:
-    container_name: peer0.org2.example.com
-    image: hyperledger/fabric-peer:$IMAGE_TAG
-    environment:
-      #Generic peer variables
-      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
-      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=${COMPOSE_PROJECT_NAME}_pln
-      - FABRIC_LOGGING_SPEC=INFO
-      #- FABRIC_LOGGING_SPEC=DEBUG
-      - CORE_PEER_TLS_ENABLED=true
-      - CORE_PEER_GOSSIP_USELEADERELECTION=true
-      - CORE_PEER_GOSSIP_ORGLEADER=false
-      - CORE_PEER_PROFILE_ENABLED=true
-      - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/fabric/tls/server.crt
-      - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/tls/server.key
-      - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/tls/ca.org1.example.com-cert.pem /etc/hyperledger/fabric/tls/ca.org2.example.com-cert.pem /etc/hyperledger/fabric/tls/ca.org3.example.com-cert.pem
-      # Peer specific variabes
-      - CORE_PEER_ID=peer0.org2.example.com
-      - CORE_PEER_ADDRESS=peer0.org2.example.com:9051
-      - CORE_PEER_LISTENADDRESS=0.0.0.0:9051
-      - CORE_PEER_CHAINCODEADDRESS=peer0.org2.example.com:9052
-      - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:9052
-      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.org2.example.com:9051
-      # - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.org2.example.com:9051
-      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.org1.example.com:7051 peer0.org3.example.com:11051
-      - CORE_PEER_LOCALMSPID=Org2MSP
-      - CORE_CHAINCODE_STARTUP_TIMEOUT=5s # O un valor mayor
-      - CORE_CHAINCODE_EXECUTETIMEOUT=20s
-      - FABRIC_CFG_PATH=/etc/hyperledger/fabric
+  # peer0.org3.example.com:
+  #   container_name: peer0.org3.example.com
+  #   image: hyperledger/fabric-peer:$IMAGE_TAG
+  #   environment:
+  #     #Generic peer variables
+  #     - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+  #     - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=${COMPOSE_PROJECT_NAME}_pln
+  #     - FABRIC_LOGGING_SPEC=INFO
+  #     #- FABRIC_LOGGING_SPEC=DEBUG
+  #     - CORE_PEER_TLS_ENABLED=true
+  #     - CORE_PEER_GOSSIP_USELEADERELECTION=true
+  #     - CORE_PEER_GOSSIP_ORGLEADER=false
+  #     - CORE_PEER_PROFILE_ENABLED=true
+  #     - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/fabric/tls/server.crt
+  #     - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/tls/server.key
+  #     - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/tls/ca.crt 
+  #     - CORE_PEER_ID=peer0.org3.example.com
+  #     - CORE_PEER_ADDRESS=peer0.org3.example.com:11051
+  #     - CORE_PEER_LISTENADDRESS=0.0.0.0:11051
+  #     - CORE_PEER_CHAINCODEADDRESS=peer0.org3.example.com:11052
+  #     - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:11052
+  #     - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.org3.example.com:11051
+  #     # - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.org3.example.com:11051
+  #     - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.org1.example.com:7051 peer0.org2.example.com:9051
+  #     - CORE_PEER_LOCALMSPID=Org3MSP
+  #     - CORE_CHAINCODE_STARTUP_TIMEOUT=5s # O un valor mayor
+  #     - CORE_CHAINCODE_EXECUTETIMEOUT=20s
+  #     - FABRIC_CFG_PATH=/etc/hyperledger/fabric
 
-    volumes:
-      - /var/run/:/host/var/run/
-      - /home/juan/PROGRAMACION/Hyperledger/pharma/pharma-ledger-network/organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/msp:/etc/hyperledger/fabric/msp
-      #CUIDADO. Esta configuarcion cruzada es necesaria para que el peer pueda acceder a los otros peers, DURANTE EL DESARROLLO UNICAMENTE
-      - /home/juan/PROGRAMACION/Hyperledger/pharma/pharma-ledger-network/organizations/peerOrganizations/org2.example.com/tls:/etc/hyperledger/fabric/tls/
-      - peer0.org2.example.com:/var/hyperledger/production
-      - /home/juan/PROGRAMACION/Hyperledger/pharma/pharma-ledger-network/config:/etc/hyperledger/fabric
-    working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
-    command: peer node start
-    ports:
-      - 9051:9051
-    networks:
-      - pln
+  #   volumes:
+  #     - /var/run/:/host/var/run/
+  #     - /home/juan/PROGRAMACION/Hyperledger/pharma/pharma-ledger-network/organizations/peerOrganizations/org3.example.com/peers/peer0.org3.example.com/msp:/etc/hyperledger/fabric/msp
+  #     #CUIDADO. Esta configuarcion cruzada es necesaria para que el peer pueda acceder a los otros peers, DURANTE EL DESARROLLO UNICAMENTE
+  #     - /home/juan/PROGRAMACION/Hyperledger/pharma/pharma-ledger-network/organizations/peerOrganizations/org3.example.com/peers/peer0.org3.example.com/tls:/etc/hyperledger/fabric/tls/
+  #     - peer0.org3.example.com:/var/hyperledger/production
+  #     # - /home/juan/PROGRAMACION/Hyperledger/pharma/pharma-ledger-network/system-genesis-block/genesis.block:/etc/hyperledger/fabric/genesis.block
+  #   working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
+  #   command: peer node start
+  #   ports:
+  #     - 11051:11051
+  #   networks:
+  #     - pln
+  # --- Sección agregada para el Explorer en docker-compose-pln-net.yaml ---
+  # explorerdb:
+  #   image: ghcr.io/hyperledger-labs/explorer-db:latest
+  #   container_name: explorerdb
+  #   environment:
+  #     - DATABASE_DATABASE=explorer
+  #     - DATABASE_USERNAME=hppoc
+  #     - DATABASE_PASSWORD=explorerdbpass
+  #   healthcheck:
+  #     test: "pg_isready -h localhost -p 5432 -q -U postgres"
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 5
+  #   volumes:
+  #     - explorerdb_data:/var/lib/postgresql/data
+  #   networks:
+  #     - pln
 
-  peer0.org3.example.com:
-    container_name: peer0.org3.example.com
-    image: hyperledger/fabric-peer:$IMAGE_TAG
-    environment:
-      #Generic peer variables
-      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
-      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=${COMPOSE_PROJECT_NAME}_pln
-      - FABRIC_LOGGING_SPEC=INFO
-      #- FABRIC_LOGGING_SPEC=DEBUG
-      - CORE_PEER_TLS_ENABLED=true
-      - CORE_PEER_GOSSIP_USELEADERELECTION=true
-      - CORE_PEER_GOSSIP_ORGLEADER=false
-      - CORE_PEER_PROFILE_ENABLED=true
-      - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/fabric/tls/server.crt
-      - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/tls/server.key
-      - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/tls/ca.org1.example.com-cert.pem /etc/hyperledger/fabric/tls/ca.org2.example.com-cert.pem /etc/hyperledger/fabric/tls/ca.org3.example.com-cert.pem
-      # Peer specific variabes
-      - CORE_PEER_ID=peer0.org3.example.com
-      - CORE_PEER_ADDRESS=peer0.org3.example.com:11051
-      - CORE_PEER_LISTENADDRESS=0.0.0.0:11051
-      - CORE_PEER_CHAINCODEADDRESS=peer0.org3.example.com:11052
-      - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:11052
-      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.org3.example.com:11051
-      # - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.org3.example.com:11051
-      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.org1.example.com:7051 peer0.org2.example.com:9051
-      - CORE_PEER_LOCALMSPID=Org3MSP
-      - CORE_CHAINCODE_STARTUP_TIMEOUT=5s # O un valor mayor
-      - CORE_CHAINCODE_EXECUTETIMEOUT=20s
-      - FABRIC_CFG_PATH=/etc/hyperledger/fabric
+  # hyperledger-explorer:
+  #   image: hyperledger/explorer:latest
+  #   #docker pull ghcr.io/hyperledger-labs/explorer:latest
+  #   # O si esa no funciona, a veces ghcr.io es más reciente:
+  #   # image: ghcr.io/hyperledger-labs/explorer:latest
+  #   # image: ghcr.io/hyperledger-labs/blockchain-explorer:latest
+  #   # image: ghcr.io/hyperledger-labs/blockchain-explorer:1.1.10 
+  #   container_name: hyperledger-explorer
+  #   environment:
+  #     - DATABASE_HOST=explorerdb
+  #     - DATABASE_PORT=5432
+  #     - DATABASE_USERNAME=hppoc 
+  #     - DATABASE_PASS=explorerdbpass
+  #     - DATABASE_DATABASE=explorer
+  #     - LOG_LEVEL_APP=info
+  #     - LOG_LEVEL_DB=info
+  #     - LOG_LEVEL_CONSOLE=debug
+  #     - LOG_CONSOLE_STDOUT=true
+  #     - DISCOVERY_AS_LOCALHOST=false
+  #     - PORT=8080
+  #     - EXPLORER_CONFIG_FILE_PATH=/opt/explorer/app/platform/fabric/config.json # Ruta por defecto
+  #     - EXPLORER_PROFILE_DIR_PATH=/opt/explorer/app/platform/fabric/connection-profile # Ruta por defecto
+  #     # Variables para conectar con Fabric
+  #     - CORE_PEER_LOCALMSPID=Org1MSP
+  #     - CORE_PEER_ADDRESS=peer0.org1.example.com:7051
+  #     #bien
+  #     - ORDERER_ADDRESS=orderer.example.com:7050
+  #     #bien
+  #     - FABRIC_CA_CLIENT_TLS_CERTFILES=/var/hyperledger/orderer/tls/ca.crt
+  #     #bien
+  #     - FABRIC_CA_CLIENT_HOME=/var/hyperledger/orderer/msp
+  #     - FABRIC_CHANNEL=plnchannel
+  #     - FABRIC_CLIENT_CONFIG_FILE=./explorer-config/network-profile.json
+  #   ports:
+  #   - "8080:8080"
+  #   depends_on:
+  #     explorerdb: 
+  #       condition: service_healthy
+  #   volumes:
+  #     - /home/juan/PROGRAMACION/Hyperledger/pharma/pharma-ledger-network/explorer/config.json:/opt/explorer/app/platform/fabric/config.json
+  #     - /home/juan/PROGRAMACION/Hyperledger/pharma/pharma-ledger-network/organizations/peerOrganizations/org1.example.com/connection-org1.json:/opt/explorer/app/platform/fabric/connection-profile/pln_connection.json 
+  #     - /home/juan/PROGRAMACION/Hyperledger/pharma/pharma-ledger-network/organizations:/opt/explorer/app/platform/fabric/organizations 
+  #     - /home/juan/PROGRAMACION/Hyperledger/pharma/pharma-ledger-network/wallet:/opt/explorer/wallet 
+  #   networks:
+  #     - pln
+  #   command: sh -c "echo '--- CONTENIDO config.json MONTADO ---'; cat /opt/explorer/app/platform/fabric/config.json; echo '--- FIN config.json ---'; echo '>>> LISTANDO WALLET MONTADA <<<'; ls -la /opt/explorer/wallet; echo '>>> FIN LISTADO WALLET <<<'; /opt/explorer/start.sh" 
 
-    volumes:
-      - /var/run/:/host/var/run/
-      - /home/juan/PROGRAMACION/Hyperledger/pharma/pharma-ledger-network/organizations/peerOrganizations/org3.example.com/peers/peer0.org3.example.com/msp:/etc/hyperledger/fabric/msp
-      #CUIDADO. Esta configuarcion cruzada es necesaria para que el peer pueda acceder a los otros peers, DURANTE EL DESARROLLO UNICAMENTE
-      - /home/juan/PROGRAMACION/Hyperledger/pharma/pharma-ledger-network/organizations/peerOrganizations/org3.example.com/tls:/etc/hyperledger/fabric/tls/
-      - peer0.org3.example.com:/var/hyperledger/production
-      - /home/juan/PROGRAMACION/Hyperledger/pharma/pharma-ledger-network/config:/etc/hyperledger/fabric
-    working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
-    command: peer node start
-    ports:
-      - 11051:11051
-    networks:
-      - pln
-  # # --- Sección agregada para el Explorer en docker-compose-pln-net.yaml ---
-  #   explorerdb:
-  #     image: ghcr.io/hyperledger-labs/explorer-db:latest
-  #     container_name: explorerdb
-  #     environment:
-  #       - DATABASE_DATABASE=explorer
-  #       - DATABASE_USERNAME=hppoc
-  #       - DATABASE_PASSWORD=explorerdbpass
-  #     healthcheck:
-  #       test: "pg_isready -h localhost -p 5432 -q -U postgres"
-  #       interval: 30s
-  #       timeout: 10s
-  #       retries: 5
-  #     volumes:
-  #       - explorerdb_data:/var/lib/postgresql/data
-  #     networks:
-  #       - pln
+  # manufacturer-app:
+  #   image: docker-manufacturer-app:latest
+  #   container_name: manufacturer-app
+  #   build:
+  #     context: ../organizations/manufacturer/application # Ruta al directorio con el Dockerfile
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - "30000:30000" # Mapea el puerto 30000 del HOST al puerto 8080 (o el que EXPOSEs) del CONTENEDOR
+  #   environment:
+  #     # Variables que app.js podría necesitar (¡AJUSTA!)
+  #     - ORG_MSP=Org1MSP # Asumiendo que Manufacturer es Org1
+  #     - CCP_PATH=/config/connection-org1.json # Ruta DENTRO del contenedor al CCP
+  #     - WALLET_PATH=/wallet # Ruta DENTRO del contenedor a la wallet
+  #     - USER_ID=Admin@org1.example.com # Nombre de la identidad en la wallet a usar (o Admin)
+  #     - CHANNEL_NAME=plnchannel
+  #     - CHAINCODE_NAME=pharmaLedgerContract
+  #     - ORG_NAME=org1.example.com
+  #     - NODE_PATH=/usr/src/app/node_modules
+  #     # - DISCOVERY_AS_LOCALHOST=false # Podría ser necesario para el SDK dentro de Docker
+  #   volumes:
+  #     # Monta el CCP (¡el regenerado con nombres de servicio!)
+  #     - ../organizations/peerOrganizations/org1.example.com/connection-org1.json:/config/connection-org1.json:ro
+  #     # Monta una wallet (necesitas crearla y poner la identidad)
+  #     - ../organizations/manufacturer/wallet-manufacturer:/wallet # Crea este directorio y pon la identidad
+  #     # Opcional: Montar el código fuente para desarrollo (si no usas build)
+  #     # - ../organizations/pharmacy/application:/usr/src/app
+  #     - ../organizations/manufacturer/contract:/usr/src/contract:ro
+  #   networks:
+  #     - pln
+  #   depends_on:
+  #     # Espera a los peers
+  #     - peer0.org1.example.com
+  #     - peer0.org2.example.com
+  #     - peer0.org3.example.com
 
-  #   hyperledger-explorer:
-  #     image: hyperledger/explorer:latest
-  #     #docker pull ghcr.io/hyperledger-labs/explorer:latest
-  #     # O si esa no funciona, a veces ghcr.io es más reciente:
-  #     # image: ghcr.io/hyperledger-labs/explorer:latest
-  #     # image: ghcr.io/hyperledger-labs/blockchain-explorer:latest
-  #     # image: ghcr.io/hyperledger-labs/blockchain-explorer:1.1.10 
-  #     container_name: hyperledger-explorer
-  #     environment:
-  #       - DATABASE_HOST=explorerdb
-  #       - DATABASE_PORT=5432
-  #       - DATABASE_USERNAME=hppoc 
-  #       - DATABASE_PASS=explorerdbpass
-  #       - DATABASE_DATABASE=explorer
-  #       - LOG_LEVEL_APP=info
-  #       - LOG_LEVEL_DB=info
-  #       - LOG_LEVEL_CONSOLE=debug
-  #       - LOG_CONSOLE_STDOUT=true
-  #       - DISCOVERY_AS_LOCALHOST=false
-  #       - PORT=8080
-  #       - EXPLORER_CONFIG_FILE_PATH=/opt/explorer/app/platform/fabric/config.json # Ruta por defecto
-  #       - EXPLORER_PROFILE_DIR_PATH=/opt/explorer/app/platform/fabric/connection-profile # Ruta por defecto
-  #       # Variables para conectar con Fabric
-  #       - CORE_PEER_LOCALMSPID=Org1MSP
-  #       - CORE_PEER_ADDRESS=peer0.org1.example.com:7051
-  #       #bien
-  #       - ORDERER_ADDRESS=orderer.example.com:7050
-  #       #bien
-  #       - FABRIC_CA_CLIENT_TLS_CERTFILES=/var/hyperledger/orderer/tls/ca.crt
-  #       #bien
-  #       - FABRIC_CA_CLIENT_HOME=/var/hyperledger/orderer/msp
-  #       - FABRIC_CHANNEL=plnchannel
-  #       - FABRIC_CLIENT_CONFIG_FILE=./explorer-config/network-profile.json
-  #     ports:
-  #     - "8080:8080"
-  #     depends_on:
-  #       explorerdb: 
-  #         condition: service_healthy
-  #     volumes:
-  #       - /home/juan/PROGRAMACION/Hyperledger/pharma/pharma-ledger-network/explorer/config.json:/opt/explorer/app/platform/fabric/config.json
-  #       - /home/juan/PROGRAMACION/Hyperledger/pharma/pharma-ledger-network/organizations/peerOrganizations/org1.example.com/connection-org1.json:/opt/explorer/app/platform/fabric/connection-profile/pln_connection.json 
-  #       - /home/juan/PROGRAMACION/Hyperledger/pharma/pharma-ledger-network/organizations:/opt/explorer/app/platform/fabric/organizations 
-  #       - /home/juan/PROGRAMACION/Hyperledger/pharma/pharma-ledger-network/wallet:/opt/explorer/wallet 
-  #     networks:
-  #       - pln
-  #     command: sh -c "echo '--- CONTENIDO config.json MONTADO ---'; cat /opt/explorer/app/platform/fabric/config.json; echo '--- FIN config.json ---'; echo '>>> LISTANDO WALLET MONTADA <<<'; ls -la /opt/explorer/wallet; echo '>>> FIN LISTADO WALLET <<<'; /opt/explorer/start.sh" 
+  # wholesaler-app:
+  #   image: docker-wholesaler-app:latest
+  #   container_name: wholesaler-app
+  #   build:
+  #     context: ../organizations/wholesaler/application # Ruta al directorio con el Dockerfile
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - "30001:30001" # Mapea el puerto 30001 del HOST al puerto 8080 (o el que EXPOSEs) del CONTENEDOR
+  #   environment:
+  #     # Variables que app.js podría necesitar (¡AJUSTA!)
+  #     - ORG_MSP=Org2MSP # Asumiendo que wholesaler es Org2
+  #     - CCP_PATH=/config/connection-org2.json # Ruta DENTRO del contenedor al CCP
+  #     - WALLET_PATH=/wallet # Ruta DENTRO del contenedor a la wallet
+  #     - USER_ID=Admin@org2.example.com # Nombre de la identidad en la wallet a usar (o Admin)
+  #     - CHANNEL_NAME=plnchannel
+  #     - CHAINCODE_NAME=pharmaLedgerContract
+  #     - ORG_NAME=org2.example.com
+  #     - NODE_PATH=/usr/src/app/node_modules
+  #     # - DISCOVERY_AS_LOCALHOST=false # Podría ser necesario para el SDK dentro de Docker
+  #   volumes:
+  #     # Monta el CCP (¡el regenerado con nombres de servicio!)
+  #     - ../organizations/peerOrganizations/org2.example.com/connection-org2.json:/config/connection-org2.json:ro
+  #     # Monta una wallet (necesitas crearla y poner la identidad)
+  #     - ../organizations/wholesaler/wallet-wholesaler:/wallet # Crea este directorio y pon la identidad
+  #     # Opcional: Montar el código fuente para desarrollo (si no usas build)
+  #     # - ../organizations/pharmacy/application:/usr/src/app
+  #     - ../organizations/wholesaler/contract:/usr/src/contract:ro
 
-  manufacturer-app:
-    image: docker-manufacturer-app:latest
-    container_name: manufacturer-app
-    build:
-      context: ../organizations/manufacturer/application # Ruta al directorio con el Dockerfile
-      dockerfile: Dockerfile
-    ports:
-      - "30000:30000" # Mapea el puerto 30000 del HOST al puerto 8080 (o el que EXPOSEs) del CONTENEDOR
-    environment:
-      # Variables que app.js podría necesitar (¡AJUSTA!)
-      - ORG_MSP=Org1MSP # Asumiendo que Manufacturer es Org1
-      - CCP_PATH=/config/connection-org1.json # Ruta DENTRO del contenedor al CCP
-      - WALLET_PATH=/wallet # Ruta DENTRO del contenedor a la wallet
-      - USER_ID=Admin@org1.example.com # Nombre de la identidad en la wallet a usar (o Admin)
-      - CHANNEL_NAME=plnchannel
-      - CHAINCODE_NAME=pharmaLedgerContract
-      - ORG_NAME=org1.example.com
-      - NODE_PATH=/usr/src/app/node_modules
-      # - DISCOVERY_AS_LOCALHOST=false # Podría ser necesario para el SDK dentro de Docker
-    volumes:
-      # Monta el CCP (¡el regenerado con nombres de servicio!)
-      - ../organizations/peerOrganizations/org1.example.com/connection-org1.json:/config/connection-org1.json:ro
-      # Monta una wallet (necesitas crearla y poner la identidad)
-      - ../organizations/manufacturer/wallet-manufacturer:/wallet # Crea este directorio y pon la identidad
-      # Opcional: Montar el código fuente para desarrollo (si no usas build)
-      # - ../organizations/pharmacy/application:/usr/src/app
-      - ../organizations/manufacturer/contract:/usr/src/contract:ro
-    networks:
-      - pln
-    depends_on:
-      # Espera a los peers
-      - peer0.org1.example.com
-      - peer0.org2.example.com
-      - peer0.org3.example.com
+  #   networks:
+  #     - pln
+  #   depends_on:
+  #     # Espera a los peers
+  #     - peer0.org1.example.com
+  #     - peer0.org2.example.com
+  #     - peer0.org3.example.com
 
-  wholesaler-app:
-    image: docker-wholesaler-app:latest
-    container_name: wholesaler-app
-    build:
-      context: ../organizations/wholesaler/application # Ruta al directorio con el Dockerfile
-      dockerfile: Dockerfile
-    ports:
-      - "30001:30001" # Mapea el puerto 30001 del HOST al puerto 8080 (o el que EXPOSEs) del CONTENEDOR
-    environment:
-      # Variables que app.js podría necesitar (¡AJUSTA!)
-      - ORG_MSP=Org2MSP # Asumiendo que wholesaler es Org2
-      - CCP_PATH=/config/connection-org2.json # Ruta DENTRO del contenedor al CCP
-      - WALLET_PATH=/wallet # Ruta DENTRO del contenedor a la wallet
-      - USER_ID=Admin@org2.example.com # Nombre de la identidad en la wallet a usar (o Admin)
-      - CHANNEL_NAME=plnchannel
-      - CHAINCODE_NAME=pharmaLedgerContract
-      - ORG_NAME=org2.example.com
-      - NODE_PATH=/usr/src/app/node_modules
-      # - DISCOVERY_AS_LOCALHOST=false # Podría ser necesario para el SDK dentro de Docker
-    volumes:
-      # Monta el CCP (¡el regenerado con nombres de servicio!)
-      - ../organizations/peerOrganizations/org2.example.com/connection-org2.json:/config/connection-org2.json:ro
-      # Monta una wallet (necesitas crearla y poner la identidad)
-      - ../organizations/wholesaler/wallet-wholesaler:/wallet # Crea este directorio y pon la identidad
-      # Opcional: Montar el código fuente para desarrollo (si no usas build)
-      # - ../organizations/pharmacy/application:/usr/src/app
-      - ../organizations/wholesaler/contract:/usr/src/contract:ro
-
-    networks:
-      - pln
-    depends_on:
-      # Espera a los peers
-      - peer0.org1.example.com
-      - peer0.org2.example.com
-      - peer0.org3.example.com
-
-  pharmacy-app:
-    image: docker-pharmacy-app:latest
-    container_name: pharmacy-app
-    build:
-      context: ../organizations/pharmacy/application # Ruta al directorio con el Dockerfile
-      dockerfile: Dockerfile
-    ports:
-      - "30002:30002" # Mapea el puerto 30001 del HOST al puerto 8080 (o el que EXPOSEs) del CONTENEDOR
-    environment:
-      # Variables que app.js podría necesitar (¡AJUSTA!)
-      - ORG_MSP=Org3MSP # Asumiendo que Pharmacy es Org3
-      - CCP_PATH=/config/connection-org3.json # Ruta DENTRO del contenedor al CCP
-      - WALLET_PATH=/wallet # Ruta DENTRO del contenedor a la wallet
-      - USER_ID=Admin@org3.example.com # Nombre de la identidad en la wallet a usar (o Admin)
-      - CHANNEL_NAME=plnchannel
-      - CHAINCODE_NAME=pharmaLedgerContract
-      - ORG_NAME=org3.example.com
-      - NODE_PATH=/usr/src/app/node_modules
-      # - DISCOVERY_AS_LOCALHOST=false # Podría ser necesario para el SDK dentro de Docker
-    volumes:
-      # Monta el CCP (¡el regenerado con nombres de servicio!)
-      - ../organizations/peerOrganizations/org3.example.com/connection-org3.json:/config/connection-org3.json:ro
-      # Monta una wallet (necesitas crearla y poner la identidad)
-      - ../organizations/pharmacy/wallet-pharmacy:/wallet # Crea este directorio y pon la identidad
-      # Opcional: Montar el código fuente para desarrollo (si no usas build)
-      # - ../organizations/pharmacy/application:/usr/src/app
-      - ../organizations/pharmacy/contract:/usr/src/contract:ro
-    networks:
-      - pln
-    depends_on:
-      # Espera a los peers
-      - peer0.org1.example.com
-      - peer0.org2.example.com
-      - peer0.org3.example.com
+  # pharmacy-app:
+  #   image: docker-pharmacy-app:latest
+  #   container_name: pharmacy-app
+  #   build:
+  #     context: ../organizations/pharmacy/application # Ruta al directorio con el Dockerfile
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - "30002:30002" # Mapea el puerto 30001 del HOST al puerto 8080 (o el que EXPOSEs) del CONTENEDOR
+  #   environment:
+  #     # Variables que app.js podría necesitar (¡AJUSTA!)
+  #     - ORG_MSP=Org3MSP # Asumiendo que Pharmacy es Org3
+  #     - CCP_PATH=/config/connection-org3.json # Ruta DENTRO del contenedor al CCP
+  #     - WALLET_PATH=/wallet # Ruta DENTRO del contenedor a la wallet
+  #     - USER_ID=Admin@org3.example.com # Nombre de la identidad en la wallet a usar (o Admin)
+  #     - CHANNEL_NAME=plnchannel
+  #     - CHAINCODE_NAME=pharmaLedgerContract
+  #     - ORG_NAME=org3.example.com
+  #     - NODE_PATH=/usr/src/app/node_modules
+  #     # - DISCOVERY_AS_LOCALHOST=false # Podría ser necesario para el SDK dentro de Docker
+  #   volumes:
+  #     # Monta el CCP (¡el regenerado con nombres de servicio!)
+  #     - ../organizations/peerOrganizations/org3.example.com/connection-org3.json:/config/connection-org3.json:ro
+  #     # Monta una wallet (necesitas crearla y poner la identidad)
+  #     - ../organizations/pharmacy/wallet-pharmacy:/wallet # Crea este directorio y pon la identidad
+  #     # Opcional: Montar el código fuente para desarrollo (si no usas build)
+  #     # - ../organizations/pharmacy/application:/usr/src/app
+  #     - ../organizations/pharmacy/contract:/usr/src/contract:ro
+  #   networks:
+  #     - pln
+  #   depends_on:
+  #     # Espera a los peers
+  #     - peer0.org1.example.com
+  #     - peer0.org2.example.com
+  #     - peer0.org3.example.com

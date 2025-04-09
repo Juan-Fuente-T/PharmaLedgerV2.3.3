@@ -1,0 +1,496 @@
+name: docker
+services:
+  explorerdb:
+    container_name: explorerdb
+    environment:
+      DATABASE_DATABASE: explorer
+      DATABASE_PASSWORD: explorerdbpass
+      DATABASE_USERNAME: hppoc
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -h localhost -p 5432 -q -U postgres
+      timeout: 10s
+      interval: 30s
+      retries: 5
+    image: ghcr.io/hyperledger-labs/explorer-db:latest
+    networks:
+      pln: null
+    volumes:
+      - type: volume
+        source: explorerdb_data
+        target: /var/lib/postgresql/data
+        volume: {}
+  hyperledger-explorer:
+    command:
+      - sh
+      - -c
+      - echo '--- CONTENIDO config.json MONTADO ---'; cat /opt/explorer/app/platform/fabric/config.json; echo '--- FIN config.json ---'; echo '>>> LISTANDO WALLET MONTADA <<<'; ls -la /opt/explorer/wallet; echo '>>> FIN LISTADO WALLET <<<'; /opt/explorer/start.sh
+    container_name: hyperledger-explorer
+    depends_on:
+      explorerdb:
+        condition: service_healthy
+        required: true
+    environment:
+      CORE_PEER_ADDRESS: peer0.org1.example.com:7051
+      CORE_PEER_LOCALMSPID: Org1MSP
+      DATABASE_DATABASE: explorer
+      DATABASE_HOST: explorerdb
+      DATABASE_PASS: explorerdbpass
+      DATABASE_PORT: "5432"
+      DATABASE_USERNAME: hppoc
+      DISCOVERY_AS_LOCALHOST: "false"
+      EXPLORER_CONFIG_FILE_PATH: /opt/explorer/app/platform/fabric/config.json
+      EXPLORER_PROFILE_DIR_PATH: /opt/explorer/app/platform/fabric/connection-profile
+      FABRIC_CA_CLIENT_HOME: /var/hyperledger/orderer/msp
+      FABRIC_CA_CLIENT_TLS_CERTFILES: /var/hyperledger/orderer/tls/ca.crt
+      FABRIC_CHANNEL: plnchannel
+      FABRIC_CLIENT_CONFIG_FILE: ./explorer-config/network-profile.json
+      LOG_CONSOLE_STDOUT: "true"
+      LOG_LEVEL_APP: info
+      LOG_LEVEL_CONSOLE: debug
+      LOG_LEVEL_DB: info
+      ORDERER_ADDRESS: orderer.example.com:7050
+      PORT: "8080"
+    image: hyperledger/explorer:latest
+    networks:
+      pln: null
+    ports:
+      - mode: ingress
+        target: 8080
+        published: "8080"
+        protocol: tcp
+    volumes:
+      - type: bind
+        source: /home/juan/PROGRAMACION/Hyperledger/pharma/pharma-ledger-network/explorer/config.json
+        target: /opt/explorer/app/platform/fabric/config.json
+        bind:
+          create_host_path: true
+      - type: bind
+        source: /home/juan/PROGRAMACION/Hyperledger/pharma/pharma-ledger-network/organizations/peerOrganizations/org1.example.com/connection-org1.json
+        target: /opt/explorer/app/platform/fabric/connection-profile/pln_connection.json
+        bind:
+          create_host_path: true
+      - type: bind
+        source: /home/juan/PROGRAMACION/Hyperledger/pharma/pharma-ledger-network/organizations
+        target: /opt/explorer/app/platform/fabric/organizations
+        bind:
+          create_host_path: true
+      - type: bind
+        source: /home/juan/PROGRAMACION/Hyperledger/pharma/pharma-ledger-network/wallet
+        target: /opt/explorer/wallet
+        bind:
+          create_host_path: true
+  manufacturer-app:
+    build:
+      context: /home/juan/PROGRAMACION/Hyperledger/pharma/pharma-ledger-network/organizations/manufacturer/application
+      dockerfile: Dockerfile
+    container_name: manufacturer-app
+    depends_on:
+      peer0.org1.example.com:
+        condition: service_started
+        required: true
+      peer0.org2.example.com:
+        condition: service_started
+        required: true
+      peer0.org3.example.com:
+        condition: service_started
+        required: true
+    environment:
+      CCP_PATH: /config/connection-org1.json
+      CHAINCODE_NAME: pharmaLedgerContract
+      CHANNEL_NAME: plnchannel
+      NODE_PATH: /usr/src/app/node_modules
+      ORG_MSP: Org1MSP
+      ORG_NAME: org1.example.com
+      USER_ID: Admin@org1.example.com
+      WALLET_PATH: /wallet
+    image: docker-manufacturer-app:latest
+    networks:
+      pln: null
+    ports:
+      - mode: ingress
+        target: 30000
+        published: "30000"
+        protocol: tcp
+    volumes:
+      - type: bind
+        source: /home/juan/PROGRAMACION/Hyperledger/pharma/pharma-ledger-network/organizations/peerOrganizations/org1.example.com/connection-org1.json
+        target: /config/connection-org1.json
+        read_only: true
+        bind:
+          create_host_path: true
+      - type: bind
+        source: /home/juan/PROGRAMACION/Hyperledger/pharma/pharma-ledger-network/organizations/manufacturer/wallet-manufacturer
+        target: /wallet
+        bind:
+          create_host_path: true
+      - type: bind
+        source: /home/juan/PROGRAMACION/Hyperledger/pharma/pharma-ledger-network/organizations/manufacturer/contract
+        target: /usr/src/contract
+        read_only: true
+        bind:
+          create_host_path: true
+  orderer.example.com:
+    command:
+      - orderer
+    container_name: orderer.example.com
+    environment:
+      FABRIC_LOGGING_SPEC: INFO
+      ORDERER_ADMIN_LISTENADDRESS: 0.0.0.0:7053
+      ORDERER_ADMIN_TLS_CERTIFICATE: /var/hyperledger/orderer/tls/server.crt
+      ORDERER_ADMIN_TLS_CLIENTAUTHREQUIRED: "true"
+      ORDERER_ADMIN_TLS_CLIENTROOTCAS: '[/var/hyperledger/orderer/tls/ca.crt]'
+      ORDERER_ADMIN_TLS_ENABLED: "true"
+      ORDERER_ADMIN_TLS_PRIVATEKEY: /var/hyperledger/orderer/tls/server.key
+      ORDERER_ADMIN_TLS_ROOTCAS: '[/var/hyperledger/orderer/tls/ca.crt]'
+      ORDERER_CHANNELPARTICIPATION_ENABLED: "true"
+      ORDERER_GENERAL_BOOTSTRAPFILE: /etc/hyperledger/fabric/genesis.block
+      ORDERER_GENERAL_BOOTSTRAPMETHOD: file
+      ORDERER_GENERAL_CLUSTER_CLIENTCERTIFICATE: /var/hyperledger/orderer/tls/server.crt
+      ORDERER_GENERAL_CLUSTER_CLIENTPRIVATEKEY: /var/hyperledger/orderer/tls/server.key
+      ORDERER_GENERAL_CLUSTER_ROOTCAS: '[/var/hyperledger/orderer/tls/ca.crt]'
+      ORDERER_GENERAL_LISTENADDRESS: 0.0.0.0
+      ORDERER_GENERAL_LISTENPORT: "7050"
+      ORDERER_GENERAL_LOCALMSPDIR: /var/hyperledger/orderer/msp
+      ORDERER_GENERAL_LOCALMSPID: OrdererMSP
+      ORDERER_GENERAL_LOGLEVEL: INFO
+      ORDERER_GENERAL_TLS_CERTIFICATE: /var/hyperledger/orderer/tls/server.crt
+      ORDERER_GENERAL_TLS_ENABLED: "true"
+      ORDERER_GENERAL_TLS_PRIVATEKEY: /var/hyperledger/orderer/tls/server.key
+      ORDERER_GENERAL_TLS_ROOTCAS: '[/var/hyperledger/orderer/tls/ca.crt]'
+      ORDERER_KAFKA_TOPIC_REPLICATIONFACTOR: "1"
+      ORDERER_KAFKA_VERBOSE: "true"
+    image: hyperledger/fabric-orderer:2.3.3
+    networks:
+      pln: null
+    ports:
+      - mode: ingress
+        target: 7050
+        published: "7050"
+        protocol: tcp
+      - mode: ingress
+        target: 7053
+        published: "7053"
+        protocol: tcp
+    volumes:
+      - type: bind
+        source: /home/juan/PROGRAMACION/Hyperledger/pharma/pharma-ledger-network/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp
+        target: /var/hyperledger/orderer/msp
+        bind:
+          create_host_path: true
+      - type: bind
+        source: /home/juan/PROGRAMACION/Hyperledger/pharma/pharma-ledger-network/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/tls/
+        target: /var/hyperledger/orderer/tls
+        bind:
+          create_host_path: true
+      - type: volume
+        source: orderer.example.com
+        target: /var/hyperledger/production/orderer
+        volume: {}
+      - type: bind
+        source: /home/juan/PROGRAMACION/Hyperledger/pharma/pharma-ledger-network/docker/system-genesis-block/genesis.block
+        target: /etc/hyperledger/fabric/genesis.block
+        bind:
+          create_host_path: true
+      - type: volume
+        source: orderer.example.com
+        target: /var/log/hyperledger/orderer
+        volume: {}
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric
+  peer0.org1.example.com:
+    container_name: peer0.org1.example.com
+    environment:
+      CORE_CHAINCODE_EXECUTETIMEOUT: 20s
+      CORE_CHAINCODE_STARTUP_TIMEOUT: 5s
+      CORE_PEER_ADDRESS: peer0.org1.example.com:7051
+      CORE_PEER_CHAINCODEADDRESS: peer0.org1.example.com:7052
+      CORE_PEER_CHAINCODELISTENADDRESS: 0.0.0.0:7052
+      CORE_PEER_GOSSIP_BOOTSTRAP: peer0.org2.example.com:9051 peer0.org3.example.com:11051
+      CORE_PEER_GOSSIP_EXTERNALENDPOINT: peer0.org1.example.com:7051
+      CORE_PEER_GOSSIP_ORGLEADER: "false"
+      CORE_PEER_GOSSIP_USELEADERELECTION: "true"
+      CORE_PEER_ID: peer0.org1.example.com
+      CORE_PEER_LISTENADDRESS: 0.0.0.0:7051
+      CORE_PEER_LOCALMSPID: Org1MSP
+      CORE_PEER_PROFILE_ENABLED: "true"
+      CORE_PEER_TLS_CERT_FILE: /etc/hyperledger/fabric/tls/server.crt
+      CORE_PEER_TLS_ENABLED: "true"
+      CORE_PEER_TLS_KEY_FILE: /etc/hyperledger/fabric/tls/server.key
+      CORE_PEER_TLS_ROOTCERT_FILE: /etc/hyperledger/fabric/tls/ca.org1.example.com-cert.pem /etc/hyperledger/fabric/tls/ca.org2.example.com-cert.pem /etc/hyperledger/fabric/tls/ca.org3.example.com-cert.pem
+      CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE: docker_pln
+      CORE_VM_ENDPOINT: unix:///host/var/run/docker.sock
+      FABRIC_CFG_PATH: /etc/hyperledger/fabric
+      FABRIC_LOGGING_SPEC: DEBUG
+    image: hyperledger/fabric-peer:2.3.3
+    networks:
+      pln: null
+    ports:
+      - mode: ingress
+        target: 7051
+        published: "7051"
+        protocol: tcp
+    volumes:
+      - type: bind
+        source: /var/run/
+        target: /host/var/run
+        bind:
+          create_host_path: true
+      - type: bind
+        source: /home/juan/PROGRAMACION/Hyperledger/pharma/pharma-ledger-network/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/msp
+        target: /etc/hyperledger/fabric/msp
+        bind:
+          create_host_path: true
+      - type: bind
+        source: /home/juan/PROGRAMACION/Hyperledger/pharma/pharma-ledger-network/organizations/peerOrganizations/org1.example.com/tls
+        target: /etc/hyperledger/fabric/tls
+        bind:
+          create_host_path: true
+      - type: volume
+        source: peer0.org1.example.com
+        target: /var/hyperledger/production
+        volume: {}
+      - type: bind
+        source: /home/juan/PROGRAMACION/Hyperledger/pharma/pharma-ledger-network/config
+        target: /etc/hyperledger/fabric
+        bind:
+          create_host_path: true
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
+  peer0.org2.example.com:
+    command:
+      - peer
+      - node
+      - start
+    container_name: peer0.org2.example.com
+    environment:
+      CORE_CHAINCODE_EXECUTETIMEOUT: 20s
+      CORE_CHAINCODE_STARTUP_TIMEOUT: 5s
+      CORE_PEER_ADDRESS: peer0.org2.example.com:9051
+      CORE_PEER_CHAINCODEADDRESS: peer0.org2.example.com:9052
+      CORE_PEER_CHAINCODELISTENADDRESS: 0.0.0.0:9052
+      CORE_PEER_GOSSIP_BOOTSTRAP: peer0.org1.example.com:7051 peer0.org3.example.com:11051
+      CORE_PEER_GOSSIP_EXTERNALENDPOINT: peer0.org2.example.com:9051
+      CORE_PEER_GOSSIP_ORGLEADER: "false"
+      CORE_PEER_GOSSIP_USELEADERELECTION: "true"
+      CORE_PEER_ID: peer0.org2.example.com
+      CORE_PEER_LISTENADDRESS: 0.0.0.0:9051
+      CORE_PEER_LOCALMSPID: Org2MSP
+      CORE_PEER_PROFILE_ENABLED: "true"
+      CORE_PEER_TLS_CERT_FILE: /etc/hyperledger/fabric/tls/server.crt
+      CORE_PEER_TLS_ENABLED: "true"
+      CORE_PEER_TLS_KEY_FILE: /etc/hyperledger/fabric/tls/server.key
+      CORE_PEER_TLS_ROOTCERT_FILE: /etc/hyperledger/fabric/tls/ca.org1.example.com-cert.pem /etc/hyperledger/fabric/tls/ca.org2.example.com-cert.pem /etc/hyperledger/fabric/tls/ca.org3.example.com-cert.pem
+      CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE: docker_pln
+      CORE_VM_ENDPOINT: unix:///host/var/run/docker.sock
+      FABRIC_CFG_PATH: /etc/hyperledger/fabric
+      FABRIC_LOGGING_SPEC: INFO
+    image: hyperledger/fabric-peer:2.3.3
+    networks:
+      pln: null
+    ports:
+      - mode: ingress
+        target: 9051
+        published: "9051"
+        protocol: tcp
+    volumes:
+      - type: bind
+        source: /var/run/
+        target: /host/var/run
+        bind:
+          create_host_path: true
+      - type: bind
+        source: /home/juan/PROGRAMACION/Hyperledger/pharma/pharma-ledger-network/organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/msp
+        target: /etc/hyperledger/fabric/msp
+        bind:
+          create_host_path: true
+      - type: bind
+        source: /home/juan/PROGRAMACION/Hyperledger/pharma/pharma-ledger-network/organizations/peerOrganizations/org2.example.com/tls
+        target: /etc/hyperledger/fabric/tls
+        bind:
+          create_host_path: true
+      - type: volume
+        source: peer0.org2.example.com
+        target: /var/hyperledger/production
+        volume: {}
+      - type: bind
+        source: /home/juan/PROGRAMACION/Hyperledger/pharma/pharma-ledger-network/config
+        target: /etc/hyperledger/fabric
+        bind:
+          create_host_path: true
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
+  peer0.org3.example.com:
+    command:
+      - peer
+      - node
+      - start
+    container_name: peer0.org3.example.com
+    environment:
+      CORE_CHAINCODE_EXECUTETIMEOUT: 20s
+      CORE_CHAINCODE_STARTUP_TIMEOUT: 5s
+      CORE_PEER_ADDRESS: peer0.org3.example.com:11051
+      CORE_PEER_CHAINCODEADDRESS: peer0.org3.example.com:11052
+      CORE_PEER_CHAINCODELISTENADDRESS: 0.0.0.0:11052
+      CORE_PEER_GOSSIP_BOOTSTRAP: peer0.org1.example.com:7051 peer0.org2.example.com:9051
+      CORE_PEER_GOSSIP_EXTERNALENDPOINT: peer0.org3.example.com:11051
+      CORE_PEER_GOSSIP_ORGLEADER: "false"
+      CORE_PEER_GOSSIP_USELEADERELECTION: "true"
+      CORE_PEER_ID: peer0.org3.example.com
+      CORE_PEER_LISTENADDRESS: 0.0.0.0:11051
+      CORE_PEER_LOCALMSPID: Org3MSP
+      CORE_PEER_PROFILE_ENABLED: "true"
+      CORE_PEER_TLS_CERT_FILE: /etc/hyperledger/fabric/tls/server.crt
+      CORE_PEER_TLS_ENABLED: "true"
+      CORE_PEER_TLS_KEY_FILE: /etc/hyperledger/fabric/tls/server.key
+      CORE_PEER_TLS_ROOTCERT_FILE: /etc/hyperledger/fabric/tls/ca.org1.example.com-cert.pem /etc/hyperledger/fabric/tls/ca.org2.example.com-cert.pem /etc/hyperledger/fabric/tls/ca.org3.example.com-cert.pem
+      CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE: docker_pln
+      CORE_VM_ENDPOINT: unix:///host/var/run/docker.sock
+      FABRIC_CFG_PATH: /etc/hyperledger/fabric
+      FABRIC_LOGGING_SPEC: INFO
+    image: hyperledger/fabric-peer:2.3.3
+    networks:
+      pln: null
+    ports:
+      - mode: ingress
+        target: 11051
+        published: "11051"
+        protocol: tcp
+    volumes:
+      - type: bind
+        source: /var/run/
+        target: /host/var/run
+        bind:
+          create_host_path: true
+      - type: bind
+        source: /home/juan/PROGRAMACION/Hyperledger/pharma/pharma-ledger-network/organizations/peerOrganizations/org3.example.com/peers/peer0.org3.example.com/msp
+        target: /etc/hyperledger/fabric/msp
+        bind:
+          create_host_path: true
+      - type: bind
+        source: /home/juan/PROGRAMACION/Hyperledger/pharma/pharma-ledger-network/organizations/peerOrganizations/org3.example.com/tls
+        target: /etc/hyperledger/fabric/tls
+        bind:
+          create_host_path: true
+      - type: volume
+        source: peer0.org3.example.com
+        target: /var/hyperledger/production
+        volume: {}
+      - type: bind
+        source: /home/juan/PROGRAMACION/Hyperledger/pharma/pharma-ledger-network/config
+        target: /etc/hyperledger/fabric
+        bind:
+          create_host_path: true
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
+  pharmacy-app:
+    build:
+      context: /home/juan/PROGRAMACION/Hyperledger/pharma/pharma-ledger-network/organizations/pharmacy/application
+      dockerfile: Dockerfile
+    container_name: pharmacy-app
+    depends_on:
+      peer0.org1.example.com:
+        condition: service_started
+        required: true
+      peer0.org2.example.com:
+        condition: service_started
+        required: true
+      peer0.org3.example.com:
+        condition: service_started
+        required: true
+    environment:
+      CCP_PATH: /config/connection-org3.json
+      CHAINCODE_NAME: pharmaLedgerContract
+      CHANNEL_NAME: plnchannel
+      NODE_PATH: /usr/src/app/node_modules
+      ORG_MSP: Org3MSP
+      ORG_NAME: org3.example.com
+      USER_ID: Admin@org3.example.com
+      WALLET_PATH: /wallet
+    image: docker-pharmacy-app:latest
+    networks:
+      pln: null
+    ports:
+      - mode: ingress
+        target: 30002
+        published: "30002"
+        protocol: tcp
+    volumes:
+      - type: bind
+        source: /home/juan/PROGRAMACION/Hyperledger/pharma/pharma-ledger-network/organizations/peerOrganizations/org3.example.com/connection-org3.json
+        target: /config/connection-org3.json
+        read_only: true
+        bind:
+          create_host_path: true
+      - type: bind
+        source: /home/juan/PROGRAMACION/Hyperledger/pharma/pharma-ledger-network/organizations/pharmacy/wallet-pharmacy
+        target: /wallet
+        bind:
+          create_host_path: true
+      - type: bind
+        source: /home/juan/PROGRAMACION/Hyperledger/pharma/pharma-ledger-network/organizations/pharmacy/contract
+        target: /usr/src/contract
+        read_only: true
+        bind:
+          create_host_path: true
+  wholesaler-app:
+    build:
+      context: /home/juan/PROGRAMACION/Hyperledger/pharma/pharma-ledger-network/organizations/wholesaler/application
+      dockerfile: Dockerfile
+    container_name: wholesaler-app
+    depends_on:
+      peer0.org1.example.com:
+        condition: service_started
+        required: true
+      peer0.org2.example.com:
+        condition: service_started
+        required: true
+      peer0.org3.example.com:
+        condition: service_started
+        required: true
+    environment:
+      CCP_PATH: /config/connection-org2.json
+      CHAINCODE_NAME: pharmaLedgerContract
+      CHANNEL_NAME: plnchannel
+      NODE_PATH: /usr/src/app/node_modules
+      ORG_MSP: Org2MSP
+      ORG_NAME: org2.example.com
+      USER_ID: Admin@org2.example.com
+      WALLET_PATH: /wallet
+    image: docker-wholesaler-app:latest
+    networks:
+      pln: null
+    ports:
+      - mode: ingress
+        target: 30001
+        published: "30001"
+        protocol: tcp
+    volumes:
+      - type: bind
+        source: /home/juan/PROGRAMACION/Hyperledger/pharma/pharma-ledger-network/organizations/peerOrganizations/org2.example.com/connection-org2.json
+        target: /config/connection-org2.json
+        read_only: true
+        bind:
+          create_host_path: true
+      - type: bind
+        source: /home/juan/PROGRAMACION/Hyperledger/pharma/pharma-ledger-network/organizations/wholesaler/wallet-wholesaler
+        target: /wallet
+        bind:
+          create_host_path: true
+      - type: bind
+        source: /home/juan/PROGRAMACION/Hyperledger/pharma/pharma-ledger-network/organizations/wholesaler/contract
+        target: /usr/src/contract
+        read_only: true
+        bind:
+          create_host_path: true
+networks:
+  pln:
+    name: docker_pln
+volumes:
+  explorerdb_data:
+    name: docker_explorerdb_data
+  orderer.example.com:
+    name: docker_orderer.example.com
+  peer0.org1.example.com:
+    name: docker_peer0.org1.example.com
+  peer0.org2.example.com:
+    name: docker_peer0.org2.example.com
+  peer0.org3.example.com:
+    name: docker_peer0.org3.example.com
