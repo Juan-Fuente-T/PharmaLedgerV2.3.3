@@ -1,9 +1,9 @@
 # Script para reiniciar la red de Hyperledger Fabric y realizar tareas de limpieza y configuración.
 
 # Instalar NVM y Node.js
-nvm install 14.21.3
+# nvm install 14.21.3
 nvm use 14.21.3
-nvm alias default 14
+# nvm alias default 14
 
 # Instalar jq
 # sudo apt-get install jq -y
