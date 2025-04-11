@@ -15,6 +15,7 @@ nvm alias default 14
 # ---- Configuración ----
 export FABRIC_CFG_PATH=${PWD}/configtx
 export PATH=${PWD}/../bin:${PWD}:$PATH
+# export IMAGE_TAG=2.3.3
 echo "****** FABRIC_CFG_PATH is set to: ${FABRIC_CFG_PATH} ******"
 
 # Variables reutilizables
@@ -47,10 +48,10 @@ export ORG3_PEER0_TLS_ROOTCERT=${PWD}/organizations/peerOrganizations/org3.examp
 echo "****** Limpiando entorno anterior... ******"
 sudo -v
 ./net-pln.sh down || echo "Fallo al bajar la red (puede que no estuviera arriba)."
-docker stop $(docker ps -a -q) 2>/dev/null || echo "No hay contenedores que parar."
-docker rm $(docker ps -a -q) 2>/dev/null || echo "No hay contenedores que borrar."
-docker network prune -f
-docker volume prune -f
+# docker stop $(docker ps -a -q) 2>/dev/null || echo "No hay contenedores que parar."
+# docker rm $(docker ps -a -q) 2>/dev/null || echo "No hay contenedores que borrar."
+# docker network prune -f
+# docker volume prune -f
 # # ---- Reconstrucción de Imágenes de Apps ----
 # echo "****** Reconstruyendo imágenes de las aplicaciones si es necesario... ******"
 # docker-compose -f docker/docker-compose-pln-net.yaml build --no-cache manufacturer-app wholesaler-app pharmacy-app
@@ -78,6 +79,11 @@ echo "****** Generando CCPs ******"
 chmod +x ./organizations/ccp-generate.sh
 ./organizations/ccp-generate.sh
 
+docker volume create genesis_volume || echo "El volumen ya existía."
+docker run --rm -v genesis_volume:/data -v $(pwd)/system-genesis-block:/source alpine sh -c "cp /source/genesis.block /data/genesis.block"
+# Verifica que está dentro (opcional)
+docker run --rm -v genesis_volume:/data alpine ls -la /data
+
 # Preparación opcional para Hyperledger Explorer (descomentar si se usa)
 echo "****** Configurando Hyperledger Explorer wallet... ******"
 ADMIN_KEY_FILE=$(find ./organizations/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/keystore/ -name '*_sk' -type f -print -quit)
@@ -98,21 +104,21 @@ ls -la ./system-genesis-block
 # ---- Levantando la red Fabric (contenedores) ----
 echo "****** Levantando la red Fabric (contenedores)... ******"
 ./net-pln.sh up
-echo "Esperando a que los contenedores se estabilicen (15s)..."
-sleep 15
+echo "****** Red levantada, esperando 60 segundos para estabilización completa del Orderer... ******"
+sleep 60
 
 # ---- Unir Orderer al Canal del sistema----
-echo "****** Haciendo que Orderer se una al canal ${CHANNEL_NAME}... ******"
-osnadmin channel join --channelID system-channel --config-block ./system-genesis-block/genesis.block -o localhost:7053 --ca-file "${ORDERER_CA}" --client-cert "${ORDERER_ADMIN_TLS_SIGN_CERT}" --client-key "${ORDERER_ADMIN_TLS_PRIVATE_KEY}"
+# echo "****** Haciendo que Orderer se una al canal ${CHANNEL_NAME}... ******"
+# osnadmin channel join --channelID system-channel --config-block ./system-genesis-block/genesis.block -o localhost:7053 --ca-file "${ORDERER_CA}" --client-cert "${ORDERER_ADMIN_TLS_SIGN_CERT}" --client-key "${ORDERER_ADMIN_TLS_PRIVATE_KEY}"
 # echo "****** Variables para el plnChannel ${ORDERER_CA}...${ORDERER_ADMIN_TLS_SIGN_CERT}...${ORDERER_ADMIN_TLS_PRIVATE_KEY} ******"
 # osnadmin channel join --channelID plnchannel --config-block ./channel-artifacts/plnchannel.block -o localhost:7053 --ca-file "${ORDERER_CA}"
 # osnadmin channel join --channelID ${CHANNEL_NAME} --config-block ./channel-artifacts/${CHANNEL_NAME}.block -o localhost:7053 --ca-file "${ORDERER_CA}"
-if [ $? -ne 0 ]; then
-  echo "ERROR: Fallo al unir el orderer al canal"
-  exit 1
-fi
-echo "****** Orderer unido al canal ${CHANNEL_NAME} ******"
-sleep 5
+# if [ $? -ne 0 ]; then
+#   echo "ERROR: Fallo al unir el orderer al canal"
+#   exit 1
+# fi
+# echo "****** Orderer unido al canal ${CHANNEL_NAME} ******"
+# sleep 5
 
 
 # ---- Generar Bloque Génesis del Canal de Aplicación ----
@@ -120,16 +126,16 @@ echo "****** Generando bloque génesis del canal ${CHANNEL_NAME}... ******"
 configtxgen -profile PharmaLedgerChannel -outputBlock ./channel-artifacts/plnchannel.block -channelID plnchannel
 
 # ---- Unir Orderer al Canal de Aplicación ----
-echo "****** Haciendo que Orderer se una al canal ${CHANNEL_NAME}... ******"
-osnadmin channel join --channelID plnchannel --config-block ./channel-artifacts/plnchannel.block -o localhost:7053 --ca-file "${ORDERER_CA}" --client-cert "${ORDERER_ADMIN_TLS_SIGN_CERT}" --client-key "${ORDERER_ADMIN_TLS_PRIVATE_KEY}"
-if [ $? -ne 0 ]; then
-  echo "ERROR: Fallo al unir el orderer al canal ${CHANNEL_NAME}"
-  exit 1
-fi
-echo "****** Orderer unido al canal ${CHANNEL_NAME} ******"
-echo "****** Contenido de channel-artifacts: ******"
-ls -la ./channel-artifacts
-sleep 5
+# echo "****** Haciendo que Orderer se una al canal ${CHANNEL_NAME}... ******"
+# osnadmin channel join --channelID plnchannel --config-block ./channel-artifacts/plnchannel.block -o localhost:7053 --ca-file "${ORDERER_CA}" --client-cert "${ORDERER_ADMIN_TLS_SIGN_CERT}" --client-key "${ORDERER_ADMIN_TLS_PRIVATE_KEY}"
+# if [ $? -ne 0 ]; then
+#   echo "ERROR: Fallo al unir el orderer al canal ${CHANNEL_NAME}"
+#   exit 1
+# fi
+# echo "****** Orderer unido al canal ${CHANNEL_NAME} ******"
+# echo "****** Contenido de channel-artifacts: ******"
+# ls -la ./channel-artifacts
+# sleep 5
 
 # ---- Unir Peers al Canal ----
 echo "****** Uniendo peer0.org1 al canal ${CHANNEL_NAME}... ******"
@@ -138,6 +144,7 @@ export CORE_PEER_LOCALMSPID=$ORG1_MSP
 export CORE_PEER_MSPCONFIGPATH=$ORG1_ADMIN_MSP_PATH
 export CORE_PEER_ADDRESS=localhost:${ORG1_PEER0_PORT}
 export CORE_PEER_TLS_ROOTCERT_FILE=$ORG1_PEER0_TLS_ROOTCERT
+export FABRIC_CFG_PATH=${PWD}/config
 for i in $(seq 1 $ATTEMPTS); do
     peer channel join -b ./channel-artifacts/plnchannel.block
     if [ $? -eq 0 ]; then
@@ -158,6 +165,7 @@ export CORE_PEER_LOCALMSPID=$ORG2_MSP
 export CORE_PEER_MSPCONFIGPATH=$ORG2_ADMIN_MSP_PATH
 export CORE_PEER_ADDRESS=localhost:${ORG2_PEER0_PORT}
 export CORE_PEER_TLS_ROOTCERT_FILE=$ORG2_PEER0_TLS_ROOTCERT
+export FABRIC_CFG_PATH=${PWD}/config
 for i in $(seq 1 $ATTEMPTS); do
     peer channel join -b ./channel-artifacts/plnchannel.block
     if [ $? -eq 0 ]; then
@@ -178,6 +186,7 @@ export CORE_PEER_LOCALMSPID=$ORG3_MSP
 export CORE_PEER_MSPCONFIGPATH=$ORG3_ADMIN_MSP_PATH
 export CORE_PEER_ADDRESS=localhost:${ORG3_PEER0_PORT}
 export CORE_PEER_TLS_ROOTCERT_FILE=$ORG3_PEER0_TLS_ROOTCERT
+export FABRIC_CFG_PATH=${PWD}/config
 for i in $(seq 1 $ATTEMPTS); do
     peer channel join -b ./channel-artifacts/plnchannel.block
     if [ $? -eq 0 ]; then
@@ -218,6 +227,7 @@ peer channel list
 ./net-pln.sh deploySmartContract
 
 # ---- Invocaciones de Chaincode ----
+export FABRIC_CFG_PATH=${PWD}/config
 peer lifecycle chaincode queryinstalled
 ./net-pln.sh invoke equipment GlobalEquipmentCorp 2000.001 e360-Ventilator GlobalEquipmentCorp
 ./net-pln.sh invoke query 2000.001

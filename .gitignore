@@ -3,6 +3,7 @@
 #
 
 # Logs
+log.txt
 logs
 *.log
 npm-debug.log*

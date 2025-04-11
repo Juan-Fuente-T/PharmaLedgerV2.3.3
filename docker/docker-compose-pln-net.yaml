@@ -9,9 +9,10 @@ volumes:
   orderer.example.com:
   peer0.org1.example.com:
   peer0.org2.example.com:
-  peer0.org3.example.com: # explorerdb_data:
-
+  peer0.org3.example.com: 
+  # explorerdb_data:
   # explorer-wallet:
+  genesis_volume:
   manufacturer-app:
   wholesaler-app:
   pharmacy-app:
@@ -61,10 +62,10 @@ services:
     working_dir: /opt/gopath/src/github.com/hyperledger/fabric
     command: orderer
     volumes:
-      - /home/juan/PROGRAMACION/Hyperledger/pharma/pharma-ledger-network/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp:/var/hyperledger/orderer/msp
-      - /home/juan/PROGRAMACION/Hyperledger/pharma/pharma-ledger-network/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/tls/:/var/hyperledger/orderer/tls
+      - /home/juan/Hyperledger/pharmaV2.3.3/PharmaLedgerV2.3.3/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp:/var/hyperledger/orderer/msp
+      - /home/juan/Hyperledger/pharmaV2.3.3/PharmaLedgerV2.3.3/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/tls/:/var/hyperledger/orderer/tls
       - orderer.example.com:/var/hyperledger/production/orderer
-      - ./system-genesis-block/genesis.block:/etc/hyperledger/fabric/genesis.block
+      - /home/juan/Hyperledger/pharmaV2.3.3/PharmaLedgerV2.3.3/system-genesis-block/genesis.block:/etc/hyperledger/fabric/genesis.block
       - orderer.example.com:/var/log/hyperledger/orderer
     ports:
       - 7050:7050
@@ -79,22 +80,22 @@ services:
       #Generic peer variables
       - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
       - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=${COMPOSE_PROJECT_NAME}_pln
-      - FABRIC_LOGGING_SPEC=DEBUG
+      - FABRIC_LOGGING_SPEC=info
       #- FABRIC_LOGGING_SPEC=DEBUG
       - CORE_PEER_TLS_ENABLED=true
-      - CORE_PEER_GOSSIP_USELEADERELECTION=true
-      - CORE_PEER_GOSSIP_ORGLEADER=false
       - CORE_PEER_PROFILE_ENABLED=true
       - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/fabric/tls/server.crt
       - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/tls/server.key
-      - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/tls/ca.org1.example.com-cert.pem /etc/hyperledger/fabric/tls/ca.org2.example.com-cert.pem /etc/hyperledger/fabric/tls/ca.org3.example.com-cert.pem
+      - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/tls/ca.crt
       - CORE_PEER_ID=peer0.org1.example.com
       - CORE_PEER_ADDRESS=peer0.org1.example.com:7051
       - CORE_PEER_LISTENADDRESS=0.0.0.0:7051
       - CORE_PEER_CHAINCODEADDRESS=peer0.org1.example.com:7052
       - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:7052
       # - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.org1.example.com:7051
-      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.org2.example.com:9051 peer0.org3.example.com:11051
+      - CORE_PEER_GOSSIP_USELEADERELECTION=true
+      - CORE_PEER_GOSSIP_ORGLEADER=false
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.org1.example.com:7051 
       - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.org1.example.com:7051
       - CORE_PEER_LOCALMSPID=Org1MSP
       # - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/fabric/admin_msp
@@ -105,11 +106,11 @@ services:
   
     volumes:
       - /var/run/:/host/var/run/
-      - /home/juan/PROGRAMACION/Hyperledger/pharma/pharma-ledger-network/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/msp:/etc/hyperledger/fabric/msp
-      - /home/juan/PROGRAMACION/Hyperledger/pharma/pharma-ledger-network/organizations/peerOrganizations/org1.example.com/tls:/etc/hyperledger/fabric/tls/
+      - /home/juan/Hyperledger/pharmaV2.3.3/PharmaLedgerV2.3.3/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/msp:/etc/hyperledger/fabric/msp
+      - /home/juan/Hyperledger/pharmaV2.3.3/PharmaLedgerV2.3.3/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls:/etc/hyperledger/fabric/tls/
       #CUIDADO. Esta configuarcion cruzada es necesaria para que el peer pueda acceder a los otros peers, DURANTE EL DESARROLLO UNICAMENTE
       - peer0.org1.example.com:/var/hyperledger/production
-      - /home/juan/PROGRAMACION/Hyperledger/pharma/pharma-ledger-network/config:/etc/hyperledger/fabric
+      # - /home/juan/Hyperledger/pharmaV2.3.3/PharmaLedgerV2.3.3/config:/etc/hyperledger/fabric
     working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
     # command: peer node start
     ports:
@@ -129,21 +130,21 @@ services:
       - FABRIC_LOGGING_SPEC=INFO
       #- FABRIC_LOGGING_SPEC=DEBUG
       - CORE_PEER_TLS_ENABLED=true
-      - CORE_PEER_GOSSIP_USELEADERELECTION=true
-      - CORE_PEER_GOSSIP_ORGLEADER=false
       - CORE_PEER_PROFILE_ENABLED=true
       - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/fabric/tls/server.crt
       - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/tls/server.key
-      - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/tls/ca.org1.example.com-cert.pem /etc/hyperledger/fabric/tls/ca.org2.example.com-cert.pem /etc/hyperledger/fabric/tls/ca.org3.example.com-cert.pem
+      - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/tls/ca.crt
       # Peer specific variabes
       - CORE_PEER_ID=peer0.org2.example.com
       - CORE_PEER_ADDRESS=peer0.org2.example.com:9051
       - CORE_PEER_LISTENADDRESS=0.0.0.0:9051
       - CORE_PEER_CHAINCODEADDRESS=peer0.org2.example.com:9052
       - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:9052
+      - CORE_PEER_GOSSIP_USELEADERELECTION=true
+      - CORE_PEER_GOSSIP_ORGLEADER=false
       - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.org2.example.com:9051
       # - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.org2.example.com:9051
-      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.org1.example.com:7051 peer0.org3.example.com:11051
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.org2.example.com:9051
       - CORE_PEER_LOCALMSPID=Org2MSP
       - CORE_CHAINCODE_STARTUP_TIMEOUT=5s # O un valor mayor
       - CORE_CHAINCODE_EXECUTETIMEOUT=20s
@@ -151,11 +152,11 @@ services:
 
     volumes:
       - /var/run/:/host/var/run/
-      - /home/juan/PROGRAMACION/Hyperledger/pharma/pharma-ledger-network/organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/msp:/etc/hyperledger/fabric/msp
+      - /home/juan/Hyperledger/pharmaV2.3.3/PharmaLedgerV2.3.3/organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/msp:/etc/hyperledger/fabric/msp
       #CUIDADO. Esta configuarcion cruzada es necesaria para que el peer pueda acceder a los otros peers, DURANTE EL DESARROLLO UNICAMENTE
-      - /home/juan/PROGRAMACION/Hyperledger/pharma/pharma-ledger-network/organizations/peerOrganizations/org2.example.com/tls:/etc/hyperledger/fabric/tls/
+      - /home/juan/Hyperledger/pharmaV2.3.3/PharmaLedgerV2.3.3/organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls:/etc/hyperledger/fabric/tls/
       - peer0.org2.example.com:/var/hyperledger/production
-      - /home/juan/PROGRAMACION/Hyperledger/pharma/pharma-ledger-network/config:/etc/hyperledger/fabric
+      # - /home/juan/Hyperledger/pharmaV2.3.3/PharmaLedgerV2.3.3/config:/etc/hyperledger/fabric
     working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
     command: peer node start
     ports:
@@ -173,21 +174,21 @@ services:
       - FABRIC_LOGGING_SPEC=INFO
       #- FABRIC_LOGGING_SPEC=DEBUG
       - CORE_PEER_TLS_ENABLED=true
-      - CORE_PEER_GOSSIP_USELEADERELECTION=true
-      - CORE_PEER_GOSSIP_ORGLEADER=false
       - CORE_PEER_PROFILE_ENABLED=true
       - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/fabric/tls/server.crt
       - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/tls/server.key
-      - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/tls/ca.org1.example.com-cert.pem /etc/hyperledger/fabric/tls/ca.org2.example.com-cert.pem /etc/hyperledger/fabric/tls/ca.org3.example.com-cert.pem
+      - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/tls/ca.crt
       # Peer specific variabes
       - CORE_PEER_ID=peer0.org3.example.com
       - CORE_PEER_ADDRESS=peer0.org3.example.com:11051
       - CORE_PEER_LISTENADDRESS=0.0.0.0:11051
       - CORE_PEER_CHAINCODEADDRESS=peer0.org3.example.com:11052
       - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:11052
+      - CORE_PEER_GOSSIP_USELEADERELECTION=true
+      - CORE_PEER_GOSSIP_ORGLEADER=false
       - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.org3.example.com:11051
       # - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.org3.example.com:11051
-      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.org1.example.com:7051 peer0.org2.example.com:9051
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.org3.example.com:11051
       - CORE_PEER_LOCALMSPID=Org3MSP
       - CORE_CHAINCODE_STARTUP_TIMEOUT=5s # O un valor mayor
       - CORE_CHAINCODE_EXECUTETIMEOUT=20s
@@ -195,11 +196,11 @@ services:
 
     volumes:
       - /var/run/:/host/var/run/
-      - /home/juan/PROGRAMACION/Hyperledger/pharma/pharma-ledger-network/organizations/peerOrganizations/org3.example.com/peers/peer0.org3.example.com/msp:/etc/hyperledger/fabric/msp
+      - /home/juan/Hyperledger/pharmaV2.3.3/PharmaLedgerV2.3.3/organizations/peerOrganizations/org3.example.com/peers/peer0.org3.example.com/msp:/etc/hyperledger/fabric/msp
       #CUIDADO. Esta configuarcion cruzada es necesaria para que el peer pueda acceder a los otros peers, DURANTE EL DESARROLLO UNICAMENTE
-      - /home/juan/PROGRAMACION/Hyperledger/pharma/pharma-ledger-network/organizations/peerOrganizations/org3.example.com/tls:/etc/hyperledger/fabric/tls/
+      - /home/juan/Hyperledger/pharmaV2.3.3/PharmaLedgerV2.3.3/organizations/peerOrganizations/org3.example.com/peers/peer0.org3.example.com/tls:/etc/hyperledger/fabric/tls/
       - peer0.org3.example.com:/var/hyperledger/production
-      - /home/juan/PROGRAMACION/Hyperledger/pharma/pharma-ledger-network/config:/etc/hyperledger/fabric
+      # - /home/juan/Hyperledger/pharmaV2.3.3/PharmaLedgerV2.3.3/config:/etc/hyperledger/fabric
     working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
     command: peer node start
     ports:
@@ -263,10 +264,10 @@ services:
   #       explorerdb: 
   #         condition: service_healthy
   #     volumes:
-  #       - /home/juan/PROGRAMACION/Hyperledger/pharma/pharma-ledger-network/explorer/config.json:/opt/explorer/app/platform/fabric/config.json
-  #       - /home/juan/PROGRAMACION/Hyperledger/pharma/pharma-ledger-network/organizations/peerOrganizations/org1.example.com/connection-org1.json:/opt/explorer/app/platform/fabric/connection-profile/pln_connection.json 
-  #       - /home/juan/PROGRAMACION/Hyperledger/pharma/pharma-ledger-network/organizations:/opt/explorer/app/platform/fabric/organizations 
-  #       - /home/juan/PROGRAMACION/Hyperledger/pharma/pharma-ledger-network/wallet:/opt/explorer/wallet 
+  #       - /home/juan/Hyperledger/pharmaV2.3.3/PharmaLedgerV2.3.3/explorer/config.json:/opt/explorer/app/platform/fabric/config.json
+  #       - /home/juan/Hyperledger/pharmaV2.3.3/PharmaLedgerV2.3.3/organizations/peerOrganizations/org1.example.com/connection-org1.json:/opt/explorer/app/platform/fabric/connection-profile/pln_connection.json 
+  #       - /home/juan/Hyperledger/pharmaV2.3.3/PharmaLedgerV2.3.3/organizations:/opt/explorer/app/platform/fabric/organizations 
+  #       - /home/juan/Hyperledger/pharmaV2.3.3/PharmaLedgerV2.3.3/wallet:/opt/explorer/wallet 
   #     networks:
   #       - pln
   #     command: sh -c "echo '--- CONTENIDO config.json MONTADO ---'; cat /opt/explorer/app/platform/fabric/config.json; echo '--- FIN config.json ---'; echo '>>> LISTANDO WALLET MONTADA <<<'; ls -la /opt/explorer/wallet; echo '>>> FIN LISTADO WALLET <<<'; /opt/explorer/start.sh" 

@@ -20,7 +20,7 @@ VERBOSE="$6"
 CC_SRC_LANGUAGE=`echo "$CC_SRC_LANGUAGE" | tr [:upper:] [:lower:]`
 CC_RUNTIME_LANGUAGE=node # chaincode runtime language is node.js
 CC_SRC_PATH="organizations/manufacturer/contract/"
-CHINCODE_NAME="pharmaLedgerContract"
+CHAINCODE_NAME="pharmaLedgerContract"
 FABRIC_CFG_PATH=$PWD/../config/
 
 echo
@@ -42,7 +42,8 @@ packageChaincode() {
   setGlobalVars $ORG
   starCallFuncWithStepLog "packageChaincode" 1
   set -x
-  peer lifecycle chaincode package ${CHINCODE_NAME}.tar.gz --path ${CC_SRC_PATH} --lang ${CC_RUNTIME_LANGUAGE} --label ${CHINCODE_NAME}_${VERSION} >&log.txt
+  export FABRIC_CFG_PATH=${PWD}/../config
+  peer lifecycle chaincode package ${CHAINCODE_NAME}.tar.gz --path ${CC_SRC_PATH} --lang ${CC_RUNTIME_LANGUAGE} --label ${CHAINCODE_NAME}_${VERSION} >&log.txt
   res=$?
   set +x
   cat log.txt
@@ -67,7 +68,8 @@ installChaincode() {
   setGlobalVars $ORG
   starCallFuncWithStepLog "installChaincode org$ORG" 2
   set -x
-  peer lifecycle chaincode install ${CHINCODE_NAME}.tar.gz >&log.txt
+  export FABRIC_CFG_PATH=${PWD}/../config
+  peer lifecycle chaincode install ${CHAINCODE_NAME}.tar.gz >&log.txt
   res=$?
   set +x
   cat log.txt
@@ -83,11 +85,12 @@ queryInstalled() {
   setGlobalVars $ORG
   starCallFuncWithStepLog "queryInstalled" 3
   set -x
+  export FABRIC_CFG_PATH=${PWD}/../config
   peer lifecycle chaincode queryinstalled >&log.txt
   res=$?
   set +x
   cat log.txt
-	PACKAGE_ID=$(sed -n "/${CHINCODE_NAME}_${VERSION}/{s/^Package ID: //; s/, Label:.*$//; p;}" log.txt)
+	PACKAGE_ID=$(sed -n "/${CHAINCODE_NAME}_${VERSION}/{s/^Package ID: //; s/, Label:.*$//; p;}" log.txt)
   verifyResult $res "Query installed on peer0.org${ORG} has failed"
   endCallFuncLogWithMsg "queryInstalled" "Query installed successful with PackageID is ${PACKAGE_ID}"
   #echo "===================== Query installed successful on peer0.org${ORG} on channel ===================== "
@@ -100,14 +103,22 @@ approveForMyOrg() {
   setGlobalVars $ORG
   starCallFuncWithStepLog "approveForMyOrg" 4
   set -x
-  peer lifecycle chaincode approveformyorg -o localhost:7050 --ordererTLSHostnameOverride orderer.example.com --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA --channelID $CHANNEL_NAME --name ${CHINCODE_NAME} --version ${VERSION}  --package-id ${PACKAGE_ID} --sequence ${VERSION} >&log.txt
+  export FABRIC_CFG_PATH=${PWD}/../config
+
+  # Ahora intenta el approve... (tu línea existente)
+  peer lifecycle chaincode approveformyorg \
+      -o localhost:7050 --ordererTLSHostnameOverride orderer.example.com \
+      --tls --cafile "$ORDERER_CA" \
+      --channelID "$CHANNEL_NAME" --name "$CHAINCODE_NAME" --version "$VERSION" \
+      --package-id "$PACKAGE_ID" --sequence "$VERSION" 
+  res=$?
   set +x
   cat log.txt
-  verifyResult $res "Chaincode definition approved on peer0.org${ORG} on channel '$CHANNEL_NAME' failed"
-  endCallFuncLogWithMsg "approveForMyOrg" "Chaincode definition approved on peer0.org${ORG} on channel '$CHANNEL_NAME'"
-  #echo "===================== Chaincode definition approved on peer0.org${ORG} on channel '$CHANNEL_NAME' ===================== "
-  echo
-}
+    verifyResult $res "Chaincode definition approved on peer0.org${ORG} on channel '$CHANNEL_NAME' failed"
+    endCallFuncLogWithMsg "approveForMyOrg" "Chaincode definition approved on peer0.org${ORG} on channel '$CHANNEL_NAME'"
+    #echo "===================== Chaincode definition approved on peer0.org${ORG} on channel '$CHANNEL_NAME' ===================== "
+    echo
+  }
 
 # checkCommitReadiness VERSION PEER ORG
 checkOrgsCommitReadiness() {
@@ -121,19 +132,19 @@ checkOrgsCommitReadiness() {
   starCallFuncWithStepLog "checkOrgsCommitReadiness" 5
   for org in $(seq 1 $CHECK_COMMIT_ORGS); do
     if [ $ORG1_BOOL -eq 1 ]; then
-      $VERIFY_ORG_MSG1 = "\"Org1MSP\": true"
+      VERIFY_ORG_MSG1="\"Org1MSP\": true"
     else
-      $VERIFY_ORG_MSG1 = "\"Org1MSP\": false"
+      VERIFY_ORG_MSG1="\"Org1MSP\": false"
     fi
     if [ $ORG2_BOOL -eq 1 ]; then
-      $VERIFY_ORG_MSG2 = "\"Org2MSP\": true"
+      VERIFY_ORG_MSG2="\"Org2MSP\": true"
     else
-      $VERIFY_ORG_MSG2 = "\"Org2MSP\": false"
+      VERIFY_ORG_MSG2="\"Org2MSP\": false"
     fi
     if [ $ORG3_BOOL -eq 1 ]; then
-      $VERIFY_ORG_MSG3 = "\"Org3MSP\": true"
+      VERIFY_ORG_MSG3="\"Org3MSP\": true"
     else
-      $VERIFY_ORG_MSG3 = "\"Org3MSP\": false"
+      VERIFY_ORG_MSG3="\"Org3MSP\": false"
     fi
     VERIFY_MSG="$VERIFY_ORG_MSG1 $VERIFY_ORG_MSG2 $VERIFY_ORG_MSG3"
     checkCommitReadiness $org $VERIFY_MSG
@@ -156,7 +167,8 @@ checkCommitReadiness() {
     sleep $DELAY
     echo "Attempting to check the commit readiness of the chaincode definition on peer0.org${ORG}, Retry after $DELAY seconds."
     set -x
-    peer lifecycle chaincode checkcommitreadiness --channelID $CHANNEL_NAME --name ${CHINCODE_NAME} --version ${VERSION} --sequence ${VERSION} --output json >&log.txt
+    export FABRIC_CFG_PATH=${PWD}/../config
+    peer lifecycle chaincode checkcommitreadiness --channelID $CHANNEL_NAME --name ${CHAINCODE_NAME} --version ${VERSION} --sequence ${VERSION} --output json >&log.txt
     res=$?
     set +x
     let rc=0
@@ -187,7 +199,8 @@ commitChaincodeDefinition() {
   # peer (if join was successful), let's supply it directly as we know
   # it using the "-o" option
   set -x
-  peer lifecycle chaincode commit -o localhost:7050 --ordererTLSHostnameOverride orderer.example.com --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA --channelID $CHANNEL_NAME --name ${CHINCODE_NAME} $PEER_CONN_PARMS --version ${VERSION} --sequence ${VERSION} >&log.txt
+  export FABRIC_CFG_PATH=${PWD}/../config
+  peer lifecycle chaincode commit -o localhost:7050 --ordererTLSHostnameOverride orderer.example.com --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA --channelID $CHANNEL_NAME --name ${CHAINCODE_NAME} $PEER_CONN_PARMS --version ${VERSION} --sequence ${VERSION} >&log.txt
   res=$?
   set +x
   cat log.txt
@@ -221,7 +234,8 @@ queryCommitted() {
     sleep $DELAY
     echo "Attempting to Query committed status on peer0.org${ORG}, Retry after $DELAY seconds."
     set -x
-    peer lifecycle chaincode querycommitted --channelID $CHANNEL_NAME --name ${CHINCODE_NAME} >&log.txt
+    export FABRIC_CFG_PATH=${PWD}/../config
+    peer lifecycle chaincode querycommitted --channelID $CHANNEL_NAME --name ${CHAINCODE_NAME} >&log.txt
     res=$?
     set +x
 		test $res -eq 0 && VALUE=$(cat log.txt | grep -o '^Version: [0-9], Sequence: [0-9], Endorsement Plugin: escc, Validation Plugin: vscc')

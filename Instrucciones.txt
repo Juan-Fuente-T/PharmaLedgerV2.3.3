@@ -87,3 +87,14 @@ export FABRIC_CFG_PATH=${PWD}/configtx
 ls $FABRIC_CFG_PATH/core.yaml
 echo $FABRIC_CFG_PATH
 ./net-pln.sh invoke query 2000.001
+
+docker logs orderer.example.com
+PARA LOGS EN SEGUNDA TERMINAL
+# Para ver solo errores y warnings (puede que no muestre nada si no los hay)
+docker logs peer0.org1.example.com | grep -E 'ERRO|WARN'
+
+# O para ver las últimas 500 líneas (más probable que contenga la info relevante)
+docker logs --tail 500 peer0.org1.example.com
+
+# O guardar todo a un archivo para revisarlo con calma
+docker logs peer0.org1.example.com > peer0org1.log 2>&1

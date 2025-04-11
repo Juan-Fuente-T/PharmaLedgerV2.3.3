@@ -302,7 +302,7 @@ function networkUp() {
   # MODIFICADO: Llamada directa a docker-compose up
   echo "INFO: Starting Fabric network containers using compose files: ${COMPOSE_FILES}"
   # docker-compose ${COMPOSE_FILES} up -d 2>&1 # Redirección original comentada
-  docker-compose ${COMPOSE_FILES} up -d
+  docker compose ${COMPOSE_FILES} up -d
   # IMAGE_TAG=2.2.12 # Comentado, debe usar la variable
 
   docker ps -a
@@ -383,7 +383,7 @@ function networkDown() {
   if [ "${DATABASE}" == "couchdb" ]; then
     COMPOSE_FILES="${COMPOSE_FILES} -f ${COMPOSE_FILE_COUCH}"
   fi
-  docker-compose ${COMPOSE_FILES} down --volumes --remove-orphans
+  docker compose ${COMPOSE_FILES} down --volumes --remove-orphans
 
   # Don't remove the generated artifacts -- note, the ledgers are always removed
   if [ "$MODE" != "restart" ]; then
