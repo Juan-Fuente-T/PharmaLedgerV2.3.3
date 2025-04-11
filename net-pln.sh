@@ -221,7 +221,7 @@ function networkUp() {
     COMPOSE_FILES="${COMPOSE_FILES} -f ${COMPOSE_FILE_COUCH}"
   fi
 
-  IMAGE_TAG=$IMAGETAG docker-compose ${COMPOSE_FILES} up -d 2>&1
+  IMAGE_TAG=$IMAGETAG docker compose ${COMPOSE_FILES} up -d 2>&1
 
   docker ps -a
   if [ $? -ne 0 ]; then
@@ -271,7 +271,7 @@ function  monitorDown() {
 # Tear down running network
 function networkDown() {
   # stop all orgs containers
-  docker-compose -f $COMPOSE_FILE_BASE down --volumes --remove-orphans
+  docker compose -f $COMPOSE_FILE_BASE down --volumes --remove-orphans
   # Don't remove the generated artifacts -- note, the ledgers are always removed
   if [ "$MODE" != "restart" ]; then
     # Bring down the network, deleting the volumes
