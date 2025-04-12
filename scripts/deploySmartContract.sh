@@ -21,7 +21,7 @@ CC_SRC_LANGUAGE=`echo "$CC_SRC_LANGUAGE" | tr [:upper:] [:lower:]`
 CC_RUNTIME_LANGUAGE=node # chaincode runtime language is node.js
 CC_SRC_PATH="organizations/manufacturer/contract/"
 CHAINCODE_NAME="pharmaLedgerContract"
-FABRIC_CFG_PATH=$PWD/../config/
+FABRIC_CFG_PATH=$PWD/./config/
 
 echo
 echo " ____    _____      _      ____    _____ "
@@ -42,8 +42,42 @@ packageChaincode() {
   setGlobalVars $ORG
   starCallFuncWithStepLog "packageChaincode" 1
   set -x
-  export FABRIC_CFG_PATH=${PWD}/../config
+  export FABRIC_CFG_PATH=${PWD}/./config
   peer lifecycle chaincode package ${CHAINCODE_NAME}.tar.gz --path ${CC_SRC_PATH} --lang ${CC_RUNTIME_LANGUAGE} --label ${CHAINCODE_NAME}_${VERSION} >&log.txt
+  
+  
+echo "--- Verificando contenido del paquete TAR.GZ (Intento 3) ---"
+TEMP_DIR="./extracted_pkg_temp"
+rm -rf "$TEMP_DIR"
+mkdir -p "$TEMP_DIR"
+
+echo "Extrayendo pharmaLedgerContract.tar.gz..."
+tar -xzvf pharmaLedgerContract.tar.gz -C "$TEMP_DIR"
+if [ ! -f "$TEMP_DIR/code.tar.gz" ]; then
+    echo "ERROR: No se encontró code.tar.gz dentro del paquete principal."
+    exit 1
+fi
+
+mkdir -p "$TEMP_DIR/code_src"
+echo "Extrayendo code.tar.gz..."
+tar -xzvf "$TEMP_DIR/code.tar.gz" -C "$TEMP_DIR/code_src"
+
+# Mostrar contenido de Dockerfile (RUTA CORREGIDA)
+echo "Contenido de Dockerfile dentro del paquete (en code.tar.gz/src/Dockerfile):"
+cat "$TEMP_DIR/code_src/src/Dockerfile" # <-- RUTA CORREGIDA AQUÍ
+echo "---------------------------------------------"
+
+# Mostrar contenido de package.json (RUTA CORREGIDA)
+echo "Contenido de package.json dentro del paquete (en code.tar.gz/src/package.json):"
+cat "$TEMP_DIR/code_src/src/package.json" # <-- RUTA CORREGIDA AQUÍ
+echo "---------------------------------------------"
+
+rm -rf "$TEMP_DIR"
+echo "Verificación del paquete completada. Saliendo temporalmente."
+exit 1
+# --- Fin de la verificación ---
+exit 1 
+# --- Fin de la verificación ---
   res=$?
   set +x
   cat log.txt
@@ -68,7 +102,7 @@ installChaincode() {
   setGlobalVars $ORG
   starCallFuncWithStepLog "installChaincode org$ORG" 2
   set -x
-  export FABRIC_CFG_PATH=${PWD}/../config
+  export FABRIC_CFG_PATH=${PWD}/./config
   peer lifecycle chaincode install ${CHAINCODE_NAME}.tar.gz >&log.txt
   res=$?
   set +x
@@ -85,7 +119,7 @@ queryInstalled() {
   setGlobalVars $ORG
   starCallFuncWithStepLog "queryInstalled" 3
   set -x
-  export FABRIC_CFG_PATH=${PWD}/../config
+  export FABRIC_CFG_PATH=${PWD}/./config
   peer lifecycle chaincode queryinstalled >&log.txt
   res=$?
   set +x
@@ -103,7 +137,7 @@ approveForMyOrg() {
   setGlobalVars $ORG
   starCallFuncWithStepLog "approveForMyOrg" 4
   set -x
-  export FABRIC_CFG_PATH=${PWD}/../config
+  export FABRIC_CFG_PATH=${PWD}/./config
 
   # Ahora intenta el approve... (tu línea existente)
   peer lifecycle chaincode approveformyorg \
@@ -167,7 +201,7 @@ checkCommitReadiness() {
     sleep $DELAY
     echo "Attempting to check the commit readiness of the chaincode definition on peer0.org${ORG}, Retry after $DELAY seconds."
     set -x
-    export FABRIC_CFG_PATH=${PWD}/../config
+    export FABRIC_CFG_PATH=${PWD}/./config
     peer lifecycle chaincode checkcommitreadiness --channelID $CHANNEL_NAME --name ${CHAINCODE_NAME} --version ${VERSION} --sequence ${VERSION} --output json >&log.txt
     res=$?
     set +x
@@ -199,7 +233,7 @@ commitChaincodeDefinition() {
   # peer (if join was successful), let's supply it directly as we know
   # it using the "-o" option
   set -x
-  export FABRIC_CFG_PATH=${PWD}/../config
+  export FABRIC_CFG_PATH=${PWD}/./config
   peer lifecycle chaincode commit -o localhost:7050 --ordererTLSHostnameOverride orderer.example.com --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA --channelID $CHANNEL_NAME --name ${CHAINCODE_NAME} $PEER_CONN_PARMS --version ${VERSION} --sequence ${VERSION} >&log.txt
   res=$?
   set +x
@@ -234,7 +268,7 @@ queryCommitted() {
     sleep $DELAY
     echo "Attempting to Query committed status on peer0.org${ORG}, Retry after $DELAY seconds."
     set -x
-    export FABRIC_CFG_PATH=${PWD}/../config
+    export FABRIC_CFG_PATH=${PWD}/./config
     peer lifecycle chaincode querycommitted --channelID $CHANNEL_NAME --name ${CHAINCODE_NAME} >&log.txt
     res=$?
     set +x

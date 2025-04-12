@@ -2,7 +2,7 @@
     "name": "pharmaledger-js",
     "version": "1.0.0",
     "description": "PharmaLedger contract implemented in JavaScript",
-    "main": "lib/pharmaledgercontract.js",
+    "main": "index.js",
     "engines": {
         "node": ">=8",
         "npm": ">=5"
@@ -10,8 +10,7 @@
     "scripts": {
         "lint": "eslint .",
         "pretest": "npm run lint",
-        "test": "nyc mocha --recursive",
-        "start": "node lib/pharmaledgercontract.js"
+        "test": "nyc mocha --recursive"
     },
     "engineStrict": true,
     "author": "Juan Fuente",

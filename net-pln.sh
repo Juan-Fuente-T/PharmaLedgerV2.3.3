@@ -112,8 +112,8 @@ function checkPrereqs() {
     # echo "https://hyperledger-fabric.readthedocs.io/en/latest/install.html"
     exit 1
   fi
-  # MODIFICADO: Eliminada la comprobación de ../config, no es relevante para solo levantar docker
-  # if [[ $? -ne 0 || ! -d "../config" ]]; then
+  # MODIFICADO: Eliminada la comprobación de ./config, no es relevante para solo levantar docker
+  # if [[ $? -ne 0 || ! -d "./config" ]]; then
   #   echo "ERROR! Peer binary and configuration files not found.."
   #   echo
   #   echo "Follow the instructions in the Fabric docs to install the Fabric Binaries:"

@@ -104,26 +104,28 @@ ls -la ./system-genesis-block
 # ---- Levantando la red Fabric (contenedores) ----
 echo "****** Levantando la red Fabric (contenedores)... ******"
 ./net-pln.sh up
-echo "****** Red levantada, esperando 60 segundos para estabilización completa del Orderer... ******"
-sleep 60
-
-# ---- Unir Orderer al Canal del sistema----
-# echo "****** Haciendo que Orderer se una al canal ${CHANNEL_NAME}... ******"
-# osnadmin channel join --channelID system-channel --config-block ./system-genesis-block/genesis.block -o localhost:7053 --ca-file "${ORDERER_CA}" --client-cert "${ORDERER_ADMIN_TLS_SIGN_CERT}" --client-key "${ORDERER_ADMIN_TLS_PRIVATE_KEY}"
-# echo "****** Variables para el plnChannel ${ORDERER_CA}...${ORDERER_ADMIN_TLS_SIGN_CERT}...${ORDERER_ADMIN_TLS_PRIVATE_KEY} ******"
-# osnadmin channel join --channelID plnchannel --config-block ./channel-artifacts/plnchannel.block -o localhost:7053 --ca-file "${ORDERER_CA}"
-# osnadmin channel join --channelID ${CHANNEL_NAME} --config-block ./channel-artifacts/${CHANNEL_NAME}.block -o localhost:7053 --ca-file "${ORDERER_CA}"
-# if [ $? -ne 0 ]; then
-#   echo "ERROR: Fallo al unir el orderer al canal"
-#   exit 1
-# fi
-# echo "****** Orderer unido al canal ${CHANNEL_NAME} ******"
-# sleep 5
+if [ $? -ne 0 ]; then
+  echo "ERROR: Fallo al levantar la red con net-pln.sh up"
+  exit 1
+fi
+echo "****** Red levantada, esperando 30 segundos para estabilización completa del Orderer... ******"
+sleep 30
 
 
-# ---- Generar Bloque Génesis del Canal de Aplicación ----
-echo "****** Generando bloque génesis del canal ${CHANNEL_NAME}... ******"
-configtxgen -profile PharmaLedgerChannel -outputBlock ./channel-artifacts/plnchannel.block -channelID plnchannel
+# ---- Crear y Unir Canal de Aplicación (Usando script dedicado) ----
+echo "****** Creando canal de aplicación ${CHANNEL_NAME} via script... ******"
+export FABRIC_CFG_PATH=${PWD}/configtx # O ${PWD}/config
+./scripts/createChannel.sh
+if [ $? -ne 0 ]; then
+  echo "ERROR: Fallo al crear el canal de aplicación usando createChannel.sh"
+  exit 1
+fi
+sleep 5
+
+
+# # ---- Generar Bloque Génesis del Canal de Aplicación ----
+# echo "****** Generando bloque génesis del canal ${CHANNEL_NAME}... ******"
+# configtxgen -profile PharmaLedgerChannel -outputBlock ./channel-artifacts/plnchannel.block -channelID plnchannel
 
 # ---- Unir Orderer al Canal de Aplicación ----
 # echo "****** Haciendo que Orderer se una al canal ${CHANNEL_NAME}... ******"

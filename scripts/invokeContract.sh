@@ -11,7 +11,7 @@ DELAY=3
 MAX_RETRY=5
 VERBOSE=true
 CHINCODE_NAME="pharmaLedgerContract"
-FABRIC_CFG_PATH=$PWD/../config/
+FABRIC_CFG_PATH=$PWD/./config/
 
 manufacturer=""
 equipmentNumber=""
@@ -27,7 +27,7 @@ chaincodeInvokeInit() {
   verifyResult $res "Invoke transaction failed on channel '$CHANNEL_NAME' due to uneven number of peer and org parameters "
   starCallFuncWithStepLog "chaincodeInvokeInit" 1
   set -x
-  export FABRIC_CFG_PATH=${PWD}/../config
+  export FABRIC_CFG_PATH=${PWD}/./config
   peer chaincode invoke -o localhost:7050 --ordererTLSHostnameOverride orderer.example.com --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA -C $CHANNEL_NAME -n ${CHINCODE_NAME} $PEER_CONN_PARMS  -c '{"function":"instantiate","Args":[]}' >&log.txt
   res=$?
   set +x
@@ -43,7 +43,7 @@ invokeMakeEquipment() {
   verifyResult $res "Invoke transaction failed on channel '$CHANNEL_NAME' due to uneven number of peer and org parameters "
   starCallFuncWithStepLog "invokeMakeEquipment" 2
   set -x
-  export FABRIC_CFG_PATH=${PWD}/../config
+  export FABRIC_CFG_PATH=${PWD}/./config
   peer chaincode invoke -o localhost:7050 --ordererTLSHostnameOverride orderer.example.com --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA -C $CHANNEL_NAME -n ${CHINCODE_NAME} $PEER_CONN_PARMS  -c '{"function":"makeEquipment","Args":["'$manufacturer'","'$equipmentNumber'", "'$equipmentName'", "'$ownerName'"]}' >&log.txt
   res=$?
   set +x
@@ -59,7 +59,7 @@ invokeWholesalerDistribute() {
   verifyResult $res "Invoke transaction failed on channel '$CHANNEL_NAME' due to uneven number of peer and org parameters "
   starCallFuncWithStepLog "invokeShipToWholesaler" 3
   set -x
-  export FABRIC_CFG_PATH=${PWD}/../config
+  export FABRIC_CFG_PATH=${PWD}/./config
   peer chaincode invoke -o localhost:7050 --ordererTLSHostnameOverride orderer.example.com --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA -C $CHANNEL_NAME -n ${CHINCODE_NAME} $PEER_CONN_PARMS  -c '{"function":"wholesalerDistribute","Args":[ "'$equipmentNumber'", "'$ownerName'"]}' >&log.txt
   res=$?
   set +x
@@ -75,7 +75,7 @@ invokePharmacyReceived() {
   verifyResult $res "Invoke transaction failed on channel '$CHANNEL_NAME' due to uneven number of peer and org parameters "
   starCallFuncWithStepLog "invokePharmacyReceived" 4
   set -x
-  export FABRIC_CFG_PATH=${PWD}/../config
+  export FABRIC_CFG_PATH=${PWD}/./config
   peer chaincode invoke -o localhost:7050 --ordererTLSHostnameOverride orderer.example.com --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA -C $CHANNEL_NAME -n ${CHINCODE_NAME} $PEER_CONN_PARMS  -c '{"function":"pharmacyReceived","Args":["'$equipmentNumber'", "'$ownerName'"]}' >&log.txt
   res=$?
   set +x
@@ -95,7 +95,7 @@ chaincodeQuery() {
     sleep $DELAY
     echo "Attempting to Query peer0.org${ORG}, Retry after $DELAY seconds."
     set -x
-    export FABRIC_CFG_PATH=${PWD}/../config
+    export FABRIC_CFG_PATH=${PWD}/./config
     peer chaincode query -C $CHANNEL_NAME -n ${CHINCODE_NAME} -c '{"function":"queryByKey","Args":["'$QUERY_KEY'"]}' >&log.txt
     res=$?
     set +x
@@ -118,7 +118,7 @@ chaincodeQueryHistory() {
     sleep $DELAY
     echo "Attempting to Query peer0.org${ORG}, Retry after $DELAY seconds."
     set -x
-    export FABRIC_CFG_PATH=${PWD}/../config
+    export FABRIC_CFG_PATH=${PWD}/./config
     # peer chaincode query -C $CHANNEL_NAME -n ${CHINCODE_NAME} -c '{"function":"queryHistoryByKey","Args":["'$QUERY_KEY'"]}' >&log.txt
     peer chaincode query -C $CHANNEL_NAME -n ${CHINCODE_NAME} -c '{"function":"queryHistoryByKey","Args":["'$QUERY_KEY'"]}' | jq .
     res=$?
