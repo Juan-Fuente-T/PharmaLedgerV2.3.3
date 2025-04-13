@@ -3,7 +3,8 @@
 # monitor logspout docker network container logs
 
 if [ -z "$1" ]; then
-   DOCKER_NETWORK=net_pln
+   # DOCKER_NETWORK=net_pln
+   DOCKER_NETWORK=net-pln
 else
    DOCKER_NETWORK="$1"
 fi

@@ -1,0 +1,76 @@
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+# define all 3 orgs and order docker config
+
+version: '2'
+
+volumes:
+  explorerdb-data:
+  # explorer-wallet:
+
+networks:
+  pln: 
+      # name: net-pln  CAMBIARLA
+      name: net_pln
+      external: true
+
+services:
+  explorerdb: # Puedes renombrar esto si quieres (ej: explorerdb)
+    image: ghcr.io/hyperledger-labs/explorer-db:latest
+    # image: postgres:11.5
+    # image: postgres:11.5-alpine
+    container_name: explorerdb # Nombre del contenedor
+    hostname: explorerdb
+    environment:
+      # - POSTGRES_DB=explorer          # <-- Nombre de la BD de tu config.json
+      # - POSTGRES_USER=hppoc           # <-- Usuario de tu config.json
+      # - POSTGRES_PASSWORD=explorerdbpass  # <-- Contraseña de tu config.json
+      # Variables específicas que podría esperar la imagen de explorer-db (si la usaras):
+      - DATABASE_DATABASE=explorer
+      - DATABASE_USERNAME=hppoc
+      - DATABASE_PASSWORD=explorerdbpass
+    volumes:
+      - explorerdb-data:/var/lib/postgresql/data
+      # - ./dbscripts/initpg.sql:/docker-entrypoint-initdb.d/initpg.sql
+    networks: # Conectar a la red compartida
+      - pln
+    healthcheck:  
+      # test: "pg_isready -h localhost -p 5432 -q -U hppoc" # Comprueba si Postgres está listo
+      test: ["CMD-SHELL", "pg_isready -U hppoc -d explorer"]      
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  explorer: # Puedes renombrar esto (ej: explorer)
+    # image: ghcr.io/hyperledger-labs/explorer:latest
+    # image: hyperledger/explorer:latest
+    image: hyperledger/explorer:1.1.8 
+    container_name: explorer # Nombre del contenedor
+    hostname: explorer
+    environment:
+      - DATABASE_HOST=explorerdb      # <-- Variable para Explorer: Nombre del servicio de la BD de arriba
+      - DATABASE_DATABASE=explorer    # <-- Variable para Explorer: Nombre de la BD
+      - DATABASE_USERNAME=hppoc     # <-- Variable para Explorer: Usuario de la BD
+      - DATABASE_PASSWD=explorerdbpass  # <-- Variable para Explorer: Contraseña de la BD (¡Ojo, suele ser PASSWD!)
+      - LOG_LEVEL_APP=info
+      - LOG_LEVEL_DB=info
+      - LOG_LEVEL_CONSOLE=debug
+      - LOG_CONSOLE_STDOUT=true
+      - DISCOVERY_AS_LOCALHOST=false    # Importante si Fabric está en Docker
+    volumes:
+      - ./config.json:/opt/explorer/app/platform/fabric/config.json
+      - ./connection-profile:/opt/explorer/app/platform/fabric/connection-profile
+      - ../wallet:/opt/explorer/wallet # Directorio local para la wallet
+      - ../organizations:/opt/explorer/app/platform/fabric/organizations
+    ports:
+      - "8080:8080" # Puerto para acceder a Explorer desde tu navegador
+    depends_on:
+      explorerdb:
+        condition: service_healthy
+    networks: # Conectar a la red compartida
+      - pln
+
+
+# docker compose -f ./explorer/docker-compose-explorer.yaml down
+# docker compose -f ./explorer/docker-compose-explorer.yaml up -d

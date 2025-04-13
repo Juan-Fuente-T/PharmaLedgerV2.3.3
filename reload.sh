@@ -46,13 +46,23 @@ export ORG3_PEER0_TLS_ROOTCERT=${PWD}/organizations/peerOrganizations/org3.examp
 # ---- Limpieza Profunda ----
 echo "****** Limpiando entorno anterior... ******"
 sudo -v
+
+echo "****** Deteniendo Hyperledger Explorer... ******"
+# Solo detener contenedores (conserva datos de Explorer)
+# docker compose -f ./explorer/docker-compose-explorer.yaml down --remove-orphans
+# Detener Y BORRAR VOLUMEN de datos de Explorer (empieza fresco la próxima vez)
+docker compose -f ./explorer/docker-compose-explorer.yaml down --volumes --remove-orphans
+if [ $? -ne 0 ]; then
+  echo "ADVERTENCIA: Hubo un problema al detener Hyperledger Explorer, continuando con Fabric..."
+fi
+echo "****** Hyperledger Explorer detenido ******"
 ./net-pln.sh down || echo "Fallo al bajar la red (puede que no estuviera arriba)."
 docker stop $(docker ps -a -q) 2>/dev/null || echo "No hay contenedores que parar."
 docker rm $(docker ps -a -q) 2>/dev/null || echo "No hay contenedores que borrar."
 docker network prune -f
 docker volume prune -f
 # # ---- Reconstrucción de Imágenes de Apps ----
-# echo "****** Reconstruyendo imágenes de las aplicaciones si es necesario... ******"
+echo "****** Reconstruyendo imágenes de las aplicaciones si es necesario... ******"
 # docker-compose -f docker/docker-compose-pln-net.yaml build --no-cache manufacturer-app wholesaler-app pharmacy-app
 sudo rm -rf ./organizations/peerOrganizations
 sudo rm -rf ./organizations/ordererOrganizations
@@ -133,6 +143,18 @@ if [ $? -ne 0 ]; then
 fi
 echo "Esperando a que los contenedores se estabilicen (10s)..."
 sleep 10
+
+# ---- Levantando Hyperledger Explorer ----
+echo "****** Levantando Hyperledger Explorer... ******"
+# Asegúrate que la ruta al compose de explorer sea correcta desde donde ejecutas este script
+docker compose -f ./explorer/docker-compose-explorer.yaml up -d
+if [ $? -ne 0 ]; then
+  echo "ERROR: Fallo al levantar Hyperledger Explorer"
+  # Podrías decidir si salir (exit 1) o solo advertir
+fi
+echo "****** Hyperledger Explorer iniciado ******"
+echo "Dale un minuto para que arranque y empiece a sincronizar..."
+echo "Puedes acceder en http://localhost:8080"
 
 # ---- Crear y Unir Canal de Aplicación (Usando script dedicado) ----
 echo "****** Creando y uniendo canal de aplicación ${CHANNEL_NAME} via script... ******"

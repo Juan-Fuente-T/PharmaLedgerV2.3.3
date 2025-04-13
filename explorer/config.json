@@ -1,0 +1,17 @@
+{
+  "network-configs": {
+    "pln-network": { 
+      "name": "Pharma Ledger Network", 
+      "profile": "/opt/explorer/app/platform/fabric/connection-profile/pln_connection.json" 
+    }
+  },
+  "default-network": "pln-network", 
+  "database": {
+     "type": "postgres", 
+     "host": "explorerdb",
+     "port": "5432",
+     "username": "hppoc", 
+     "password": "explorerdbpass", 
+     "database": "explorer" 
+  }
+}

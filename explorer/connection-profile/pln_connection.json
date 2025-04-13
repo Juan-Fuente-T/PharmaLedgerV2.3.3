@@ -1,0 +1,110 @@
+{
+    "name": "pln",
+    "version": "1.0.0",
+    "client": {
+        "organization": "Org1",
+        "enableAuthentication": false,
+        "adminCredential": {
+            "id": "admin",
+            "password": "adminpw"
+        },
+        "credentialStore": {
+            "path": "/opt/explorer/wallet",
+            "wallet": "wallet"
+        },
+        "connection": {
+            "timeout": {
+                "peer": {
+                    "endorser": "300"
+                },
+                "orderer": "300"
+            }
+        },
+        "tlsEnable": true
+    },
+    "channels": {
+        "plnchannel": {
+            "orderers": [
+                "orderer.example.com"
+            ],
+            "peer0.org1.example.com": {
+                "endorsingPeer": true,
+                "chaincodeQuery": true,
+                "ledgerQuery": true,
+                "eventSource": true
+            },
+            "peer0.org2.example.com": {
+                "endorsingPeer": true,
+                "chaincodeQuery": true,
+                "ledgerQuery": true,
+                "eventSource": true
+            },
+            "peer0.org3.example.com": {
+                "endorsingPeer": true,
+                "chaincodeQuery": true,
+                "ledgerQuery": true,
+                "eventSource": true
+            }
+        }
+    },
+    "organizations": {
+        "Org1": {
+            "mspid": "Org1MSP",
+            "peers": [
+                "peer0.org1.example.com"
+            ],
+            "adminPrivateKey": {
+                "path": "/opt/explorer/wallet/private_key" 
+              },
+              "signedCert": {
+                "path": "/opt/explorer/wallet/certificate"
+              }
+        },
+        "Org2": {
+            "mspid": "Org2MSP",
+            "peers": [
+                "peer0.org2.example.com"
+            ]
+        },
+        "Org3": {
+            "mspid": "Org3MSP",
+            "peers": [
+                "peer0.org3.example.com"
+            ]
+        },
+        "OrdererOrg": {
+            "mspid": "OrdererMSP",
+            "orderers": [
+                "orderer.example.com"
+            ]
+        }
+    },
+    "orderers": {
+        "orderer.example.com": {
+            "url": "grpcs://orderer.example.com:7050",
+            "tlsCACerts": {
+                "path": "/opt/explorer/app/platform/fabric/organizations/ordererOrganizations/example.com/tlsca/tlsca.example.com-cert.pem"
+            }
+        }
+    },
+    "peers": {
+        "peer0.org1.example.com": {
+            "url": "grpcs://peer0.org1.example.com:7051",
+            "tlsCACerts": {
+                "path": "/opt/explorer/app/platform/fabric/organizations/peerOrganizations/org1.example.com/tlsca/tlsca.org1.example.com-cert.pem"
+            }
+        },
+        "peer0.org2.example.com": {
+            "url": "grpcs://peer0.org2.example.com:9051",
+            "tlsCACerts": {
+                "path": "/opt/explorer/app/platform/fabric/organizations/peerOrganizations/org2.example.com/tlsca/tlsca.org2.example.com-cert.pem"
+            }
+        },
+        "peer0.org3.example.com": {
+            "url": "grpcs://peer0.org3.example.com:11051",
+            "tlsCACerts": {
+                "path": "/opt/explorer/app/platform/fabric/organizations/peerOrganizations/org3.example.com/tlsca/tlsca.org3.example.com-cert.pem"
+            }
+        }
+    }
+}
