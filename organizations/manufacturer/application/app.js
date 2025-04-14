@@ -5,6 +5,10 @@
  # App.js load application server:
  */
 'use strict';
+const path = require('path');
+process.env.NODE_PATH = path.resolve(__dirname, 'node_modules');
+require('module').Module._initPaths();
+
 const express = require('express')
 const app = express()
 app.set('view engine', 'ejs')
@@ -19,7 +23,7 @@ const yaml = require('js-yaml');
 app.use(express.static('public'))
 
 const { Wallets } = require('fabric-network');
-const path = require('path');
+// const path = require('path');
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 var cache = require('memory-cache');

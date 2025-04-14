@@ -27,6 +27,12 @@ class WalletService {
         const privateKey = fs.readFileSync(path.join(credPath, '/msp/keystore/priv_sk')).toString();
         // Load credentials into wallet
         const identityLabel = user;
+        // const existingIdentity = await wallet.get(identityLabel);
+        // if (existingIdentity) {
+        //   console.log(`User ${identityLabel} already exists.`);
+        //   // return { status: 'exists', message: `User ${identityLabel} already exists.` }; // O lanzar un error
+        //   throw new Error(`User ${identityLabel} already exists in the wallet.`);
+        // }
         const identity = {
             credentials: {
                 certificate,

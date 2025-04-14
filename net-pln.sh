@@ -263,7 +263,7 @@ function invokeContract() {
   exit 0
 }
 function  monitorUp() {
-  # scripts/monitor.sh
+  scripts/monitor.sh
 }
 function  monitorDown() {
    docker kill logspout || true
